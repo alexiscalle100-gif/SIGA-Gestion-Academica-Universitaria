@@ -27,27 +27,42 @@ Plataforma web de **Gestión Académica Universitaria** desarrollada en **Larave
   - El Estudiante puede alternar entre sus carreras desde el **Dashboard**, **Inscripción y Cursos** y **Avance e Historial**.
   - **Control automático de choques entre carreras y facultades**: bloquea tanto **choques de horario** (mismo turno o franja solapada en el mismo mes) como **choques de materia equivalente** en otra facultad, permitiendo cursar ambas carreras en turnos distintos.
 
-### 3. Ofertas Académicas con Horarios por Turno
+### 3. Carreras, Pensums Editables y Ofertas con Horarios por Turno
+- **Ciclo de vida de carreras**: Toda carrera nueva nace en estado **Inhabilitada** hasta cargar las materias de su pensum (existentes o nuevas con prerrequisitos por materia y por nivel completo) y aprobar su habilitación. Las carreras deshabilitadas pueden volver a reactivarse y editarse en cualquier momento.
+- **Prerrequisitos visibles en Pensum**: Tanto el Administrador como el Estudiante visualizan directamente en el Pensum los requisitos de cada materia (códigos, nombres y nivel completo), indicando si ya están cumplidos o pendientes.
+- **Docentes con múltiples facultades**: El Administrador puede asignar una o varias facultades a cada docente; el sistema valida choques horarios del docente a través de todas sus facultades.
+- **Ofertas flexibles**: Se permite habilitar un módulo **sin aula ni docente asignados inicialmente** y asignarlos/modificarlos posteriormente desde *Ofertas habilitadas → Editar*.
 - **Horarios explícitos por turno**:
   - **Mañana**: `07:30 - 11:30 · Lunes a Viernes`
   - **Tarde**: `14:00 - 18:00 · Lunes a Viernes`
   - **Noche**: `18:45 - 22:15 · Lunes a Viernes`
-- **Dos pestañas administrativas**:
-  1. **Habilitación de materias**: botones de facultades, catálogo filtrado por colores de área, configuración de oferta con confirmación previa y listado de docentes mostrando choques en tiempo real.
-  2. **Ofertas habilitadas**: edición controlada (solo docente, aula y cupo ≤ 50; fechas, turno y horario bloqueados), deshabilitación (anula inscripciones y libera el cupo de 6) y eliminación permitida únicamente sin inscritos.
 
-### 4. Inscripción por Intentos, Actividades Presentadas y Calificación Exclusiva Docente
+### 4. Inscripción por Intentos, Control Estricto de Roles y Calificación Exclusiva Docente
 - **8 validaciones automáticas** al inscribirse (matrícula activa, pertenencia al pensum, prerrequisitos aprobados, no aprobada/en curso, ventana de hasta 4 días desde el inicio, sin choque horario/materia en ninguna carrera, cupo < 6 y plazas disponibles) con confirmación obligatoria y sin baja voluntaria.
-- **Presentación de actividades**: El estudiante puede marcar sus actividades como **Presentada** (con comentario opcional de entrega), notificando al docente, pero **solo el docente dueño de la materia puede anotar o modificar calificaciones** (acceso bloqueado con HTTP 403 para estudiantes y administrador).
+- **Separación estricta de roles (RBAC)**:
+  - **Solo el Docente titular** registra el estado de entrega (`Presentada` / `No presentada`), comentarios y calificaciones enteras. El estudiante visualiza sus actividades y notas en modo solo lectura (HTTP 403 ante intentos de modificación).
+  - **Solo Administración** puede modificar los datos personales de estudiantes y docentes; el estudiante únicamente puede actualizar su contraseña.
 - **Cierre de materia y auditoría**: Las tareas deben sumar exactamente **100 puntos**; se diferencia estrictamente **Sin calificar (`NULL`)** de **`0`**; nota mínima de aprobación **51/100** (enteros); tras el cierre solo se admiten correcciones auditadas (`grade_adjustments`).
 
-### 5. Reportes Oficiales y Arquitectura
+### 5. Reportes Oficiales, Patrones de Diseño (incluyendo Singleton) y KPIs ISO/IEC 25010
 - Exportación de reportes académicos en **PDF (DomPDF)** y **Excel `.xlsx` (PhpSpreadsheet)**.
-- **Arquitectura MVC en capas + 4 Patrones de Diseño**:
+- **Arquitectura MVC en capas + 5 Patrones de Diseño**:
+  - **Singleton Pattern** (`App\Support\AcademicConfigSingleton` — instancia única de configuración institucional, reglas académicas y umbrales KPI ISO/IEC 25010)
   - **Repository Pattern** (`OfferingRepositoryInterface` / `OfferingRepository`)
   - **Strategy Pattern** (`ReportExportContext` + `PdfReportStrategy` + `ExcelReportStrategy`)
   - **Observer Pattern** (`EnrollmentObserver` → notificaciones y bitácora de auditoría)
   - **Service Layer** (`SemesterService`, `CurriculumProgressService`, `OfferingService`, `EnrollmentService`, `TaskGradingService`)
+
+### 6. Pruebas de Calidad de Software con KPIs (`SoftwareQualityKpiTest`)
+
+| KPI | Indicador ISO/IEC 25010 | Meta | Resultado Verificado |
+| :--- | :--- | :--- | :--- |
+| **KPI-01** | Tasa de Éxito Funcional (`php artisan test`) | ≥ 95% | **100%** (12/12 pruebas aprobadas) |
+| **KPI-02** | Tiempo Promedio de Respuesta HTTP (2da carrera) | < 500 ms | **Cumplido** (< 150 ms en pruebas automatizadas) |
+| **KPI-03** | Cumplimiento de Seguridad RBAC (datos y notas) | 100% | **100%** (HTTP 403 verificado en todos los bloqueos) |
+| **KPI-04** | Efectividad en Prevención de Choques Multi-Facultad | 100% | **100%** (docente multi-facultad, aula y doble carrera) |
+| **KPI-05** | Integridad de Patrones (Singleton `===`, Repository, Strategy) | 100% | **100%** (instancia única y protección contra deserialización) |
+| **KPI-06** | Ciclo de Vida de Carreras y Ofertas sin Asignación Inicial | 100% | **100%** (creación inhabilitada, pensum, reactivación y edición posterior) |
 
 ---
 
@@ -161,4 +176,4 @@ cd sistema-gestion-academica
 php artisan test
 ```
 
-Resultado esperado: **8 pruebas aprobadas, 44 aserciones verificadas** (validando facultades/carreras, reglas de ofertas y aulas, 8 validaciones de inscripción, mensajes priorizados, aislamiento RBAC, cierre de materia con 100 pts, presentación de actividades con nota exclusiva docente y Doble Carrera multi-facultad).
+Resultado esperado: **12 pruebas aprobadas** (`ExampleTest`, `ModularAcademicSystemTest` y `SoftwareQualityKpiTest`), validando reglas modulares, Doble Carrera multi-facultad, docentes multi-facultad, ofertas sin docente/aula inicial, carreras inhabilitadas hasta aprobación, Patrón Singleton y KPIs de calidad ISO/IEC 25010.

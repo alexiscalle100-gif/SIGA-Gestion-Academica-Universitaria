@@ -89,10 +89,10 @@
                                         · {{ $enr->career->faculty->code ?? '' }}</span>
                                 @endif
                                 <span class="text-xs text-slate-500">{{ $enr->offering->monthLabel() }} ·
-                                    {{ $enr->offering->scheduleText() }} · Aula {{ $enr->offering->classroom }}</span>
+                                    {{ $enr->offering->scheduleText() }} · {{ $enr->offering->classroomLabel() }}</span>
                             </div>
                             <div class="font-bold text-slate-800 mt-1">{{ $enr->offering->subject->name }}</div>
-                            <div class="text-xs text-slate-500">Docente: {{ $enr->offering->teacher->name }} · Intento
+                            <div class="text-xs text-slate-500">Docente: {{ $enr->offering->teacherLabel() }} · Intento
                                 #{{ $enr->attempt_number }}</div>
                         </div>
                         <div class="flex items-center gap-3 shrink-0">

@@ -56,6 +56,7 @@ class ModularAcademicSystemTest extends TestCase
             'code' => 'SIS',
             'name' => 'Ingeniería de Sistemas',
             'shifts' => ['manana', 'tarde', 'noche'],
+            'is_active' => true,
         ]);
 
         $this->carGas = Career::create([
@@ -63,6 +64,7 @@ class ModularAcademicSystemTest extends TestCase
             'code' => 'GAS',
             'name' => 'Gastronomía',
             'shifts' => ['manana', 'tarde'], // NO noche
+            'is_active' => true,
         ]);
 
         $this->mat101 = Subject::create(['faculty_id' => $this->facIng->id, 'code' => 'MAT-101', 'area_prefix' => 'MAT', 'name' => 'Cálculo I']);
@@ -443,7 +445,7 @@ class ModularAcademicSystemTest extends TestCase
         $this->assertSame($this->carGas->id, $enrGas->career_id);
     }
 
-    public function test_student_can_mark_activity_submitted_and_only_teacher_can_grade_it(): void
+    public function test_only_teacher_can_record_submission_status_comments_and_grades(): void
     {
         $today = now();
         $offering = Offering::create([
@@ -464,32 +466,30 @@ class ModularAcademicSystemTest extends TestCase
             'due_date' => $today->copy()->addDays(10)->format('Y-m-d'), 'created_by' => $this->docIng1->id,
         ]);
 
-        // Estudiante presenta su actividad
+        // Estudiante solo visualiza sus actividades (no puede marcar presentado ni enviar comentarios ni calificarse)
         $this->actingAs($this->student)
-            ->post(route('student.tasks.submit', [$enrollment, $task]), ['submission_note' => 'Entregado'])
-            ->assertRedirect();
+            ->get(route('student.enrollments.show', $enrollment))
+            ->assertStatus(200)
+            ->assertDontSee('Marcar Presentada');
 
-        $this->assertDatabaseHas('task_grades', [
-            'offering_task_id' => $task->id,
-            'enrollment_id' => $enrollment->id,
-            'submission_note' => 'Entregado',
-            'score' => null,
-        ]);
-
-        // Estudiante NO puede calificarse a sí mismo (403)
         $this->actingAs($this->student)
-            ->post(route('teacher.tasks.grade', [$task, $enrollment]), ['score' => 100])
+            ->post(route('teacher.tasks.grade', [$task, $enrollment]), ['score' => 100, 'is_submitted' => 1])
             ->assertStatus(403);
 
-        // Solo el docente titular anota la nota
+        // Solo el docente titular marca presentada, comenta y anota la nota
         $this->actingAs($this->docIng1)
-            ->post(route('teacher.tasks.grade', [$task, $enrollment]), ['score' => 88, 'comment' => 'Muy bien'])
+            ->post(route('teacher.tasks.grade', [$task, $enrollment]), [
+                'is_submitted' => 1,
+                'score' => 88,
+                'comment' => 'Muy bien',
+            ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('task_grades', [
             'offering_task_id' => $task->id,
             'enrollment_id' => $enrollment->id,
             'score' => 88,
+            'comment' => 'Muy bien',
         ]);
     }
 }

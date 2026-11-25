@@ -82,7 +82,13 @@
                             <td class="px-3 py-3 text-xs">
                                 <span class="px-2 py-0.5 rounded-full font-semibold {{ $u->isAdmin() ? 'bg-amber-100 text-amber-800' : ($u->isTeacher() ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800') }}">{{ $u->roleLabel() }}</span>
                                 <div class="text-slate-500 mt-0.5">
-                                    {{ $u->isTeacher() ? ($u->faculty->name ?? '—') : ($u->isStudent() ? ($u->career->name ?? '—') : 'Administración General') }}
+                                    @if($u->isTeacher())
+                                        {{ $u->assignedFaculties()->pluck('code')->implode(', ') ?: '—' }}
+                                    @elseif($u->isStudent())
+                                        {{ $u->activeCareers()->pluck('name')->implode(' + ') ?: '—' }}
+                                    @else
+                                        Administración General
+                                    @endif
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-right">

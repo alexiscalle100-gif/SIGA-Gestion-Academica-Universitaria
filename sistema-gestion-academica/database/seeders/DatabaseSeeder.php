@@ -35,18 +35,18 @@ class DatabaseSeeder extends Seeder
         $facJur = Faculty::create(['code' => 'JUR', 'name' => 'Facultad de Ciencias Jurídicas y Sociales', 'description' => 'Derecho y Psicología.']);
         $facGas = Faculty::create(['code' => 'GAS', 'name' => 'Facultad de Gastronomía', 'description' => 'Artes culinarias, nutrición y gestión gastronómica.']);
 
-        // 2. OCHO CARRERAS (todas con 48 materias / 8 niveles × 6 meses)
-        $carSis = Career::create(['faculty_id' => $facIng->id, 'code' => 'SIS', 'name' => 'Ingeniería de Sistemas', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en desarrollo y arquitectura de software.']);
-        $carTel = Career::create(['faculty_id' => $facIng->id, 'code' => 'TEL', 'name' => 'Ingeniería de Telecomunicaciones', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en redes y telecomunicaciones.']);
-        $carInd = Career::create(['faculty_id' => $facIng->id, 'code' => 'IND', 'name' => 'Ingeniería Industrial', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en producción, calidad y logística.']);
+        // 2. OCHO CARRERAS PRE-APROBADAS (todas con 48 materias / 8 niveles × 6 meses)
+        $carSis = Career::create(['faculty_id' => $facIng->id, 'code' => 'SIS', 'name' => 'Ingeniería de Sistemas', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en desarrollo y arquitectura de software.', 'is_active' => true]);
+        $carTel = Career::create(['faculty_id' => $facIng->id, 'code' => 'TEL', 'name' => 'Ingeniería de Telecomunicaciones', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en redes y telecomunicaciones.', 'is_active' => true]);
+        $carInd = Career::create(['faculty_id' => $facIng->id, 'code' => 'IND', 'name' => 'Ingeniería Industrial', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en producción, calidad y logística.', 'is_active' => true]);
 
-        $carAdm = Career::create(['faculty_id' => $facEmp->id, 'code' => 'ADM', 'name' => 'Administración de Empresas', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en gestión estratégica y negocios.']);
-        $carCpa = Career::create(['faculty_id' => $facEmp->id, 'code' => 'CPA', 'name' => 'Contaduría Pública', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en auditoría, tributación y finanzas.']);
+        $carAdm = Career::create(['faculty_id' => $facEmp->id, 'code' => 'ADM', 'name' => 'Administración de Empresas', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en gestión estratégica y negocios.', 'is_active' => true]);
+        $carCpa = Career::create(['faculty_id' => $facEmp->id, 'code' => 'CPA', 'name' => 'Contaduría Pública', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en auditoría, tributación y finanzas.', 'is_active' => true]);
 
-        $carDer = Career::create(['faculty_id' => $facJur->id, 'code' => 'DER', 'name' => 'Derecho', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en ciencias jurídicas.']);
-        $carPsi = Career::create(['faculty_id' => $facJur->id, 'code' => 'PSI', 'name' => 'Psicología', 'shifts' => ['manana', 'tarde'], 'description' => 'Plan modular de 48 materias en psicología clínica y organizacional.']);
+        $carDer = Career::create(['faculty_id' => $facJur->id, 'code' => 'DER', 'name' => 'Derecho', 'shifts' => ['manana', 'tarde', 'noche'], 'description' => 'Plan modular de 48 materias en ciencias jurídicas.', 'is_active' => true]);
+        $carPsi = Career::create(['faculty_id' => $facJur->id, 'code' => 'PSI', 'name' => 'Psicología', 'shifts' => ['manana', 'tarde'], 'description' => 'Plan modular de 48 materias en psicología clínica y organizacional.', 'is_active' => true]);
 
-        $carGas = Career::create(['faculty_id' => $facGas->id, 'code' => 'GAS', 'name' => 'Gastronomía', 'shifts' => ['manana', 'tarde'], 'description' => 'Plan modular de 48 materias en alta cocina y nutrición.']);
+        $carGas = Career::create(['faculty_id' => $facGas->id, 'code' => 'GAS', 'name' => 'Gastronomía', 'shifts' => ['manana', 'tarde'], 'description' => 'Plan modular de 48 materias en alta cocina y nutrición.', 'is_active' => true]);
 
         $subjects = [];
         $makeSubj = function (Faculty $fac, string $code, string $name, int $credits = 4) use (&$subjects): Subject {
@@ -263,10 +263,23 @@ class DatabaseSeeder extends Seeder
         $admin = User::create(['name' => 'Lic. Carlos Mendoza', 'email' => 'admin@upds.edu.bo', 'password' => Hash::make('Admin123*'), 'role' => User::ROLE_ADMIN, 'code' => 'ADM-001', 'document_number' => '4589120 SC', 'phone' => '70012345']);
 
         $docIng1 = User::create(['name' => 'Ph.D. Luigi Antequera Tamari', 'email' => 'docente@upds.edu.bo', 'password' => Hash::make('Docente123*'), 'role' => User::ROLE_TEACHER, 'code' => 'DOC-101', 'faculty_id' => $facIng->id, 'phone' => '71023456']);
+        $docIng1->faculties()->attach([$facIng->id => ['is_primary' => true]]);
+
+        // Docente multi-facultad (habilitada en Ingeniería y Ciencias Empresariales)
         $docIng2 = User::create(['name' => 'Ing. Valeria Rojas Quiroga', 'email' => 'valeria.rojas@upds.edu.bo', 'password' => Hash::make('Docente123*'), 'role' => User::ROLE_TEACHER, 'code' => 'DOC-102', 'faculty_id' => $facIng->id, 'phone' => '72034567']);
+        $docIng2->faculties()->attach([
+            $facIng->id => ['is_primary' => true],
+            $facEmp->id => ['is_primary' => false],
+        ]);
+
         $docEmp1 = User::create(['name' => 'Mgr. Ricardo Paredes Luna', 'email' => 'ricardo.paredes@upds.edu.bo', 'password' => Hash::make('Docente123*'), 'role' => User::ROLE_TEACHER, 'code' => 'DOC-201', 'faculty_id' => $facEmp->id, 'phone' => '72145678']);
+        $docEmp1->faculties()->attach([$facEmp->id => ['is_primary' => true]]);
+
         $docJur1 = User::create(['name' => 'Dra. Mónica Arteaga Soliz', 'email' => 'monica.arteaga@upds.edu.bo', 'password' => Hash::make('Docente123*'), 'role' => User::ROLE_TEACHER, 'code' => 'DOC-301', 'faculty_id' => $facJur->id, 'phone' => '72256789']);
+        $docJur1->faculties()->attach([$facJur->id => ['is_primary' => true]]);
+
         $docGas1 = User::create(['name' => 'Chef Fernando Salazar Paredes', 'email' => 'chef.salazar@upds.edu.bo', 'password' => Hash::make('Docente123*'), 'role' => User::ROLE_TEACHER, 'code' => 'DOC-401', 'faculty_id' => $facGas->id, 'phone' => '73045678']);
+        $docGas1->faculties()->attach([$facGas->id => ['is_primary' => true]]);
 
         // Estudiante con DOBLE CARRERA EN DISTINTAS FACULTADES: Ingeniería de Sistemas (ING) + Administración de Empresas (EMP)!
         $estDual = User::create(['name' => 'Alexis Morales Vargas', 'email' => 'estudiante@upds.edu.bo', 'password' => Hash::make('Estudiante123*'), 'role' => User::ROLE_STUDENT, 'code' => 'EST-202601', 'career_id' => $carSis->id, 'phone' => '76011223']);

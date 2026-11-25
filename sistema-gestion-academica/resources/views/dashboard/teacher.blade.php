@@ -6,7 +6,7 @@
 @section('content')
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
         <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-            Facultad: {{ $user->faculty->name ?? 'Sin asignar' }} · Semestre {{ $currentSemester->code }}
+            Facultad(es): {{ $user->assignedFaculties()->pluck('name')->implode(' · ') ?: 'Sin asignar' }} · Semestre {{ $currentSemester->code }}
         </span>
         <a href="{{ route('teacher.offerings.index') }}"
             class="px-4 py-2 rounded-lg bg-[#0F2744] hover:bg-[#1E3A5F] text-white text-xs font-semibold">
@@ -47,7 +47,7 @@
                             <span
                                 class="px-2 py-0.5 rounded font-mono text-xs font-bold {{ $style['bg'] }} {{ $style['text'] }}">{{ $off->subject->code }}</span>
                             <span class="text-xs text-slate-500">{{ $off->semester->code }} · {{ $off->monthLabel() }} ·
-                                {{ $off->scheduleText() }} · Aula {{ $off->classroom }}</span>
+                                {{ $off->scheduleText() }} · {{ $off->classroomLabel() }}</span>
                         </div>
                         <div class="font-bold text-slate-800 mt-1">{{ $off->subject->name }}</div>
                         <div class="text-xs text-slate-500 mt-0.5">

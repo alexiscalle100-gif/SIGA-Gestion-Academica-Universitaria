@@ -72,8 +72,8 @@
                     @endphp
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6" x-data="{
                                     confirmOpen: false,
-                                    teacherName: '',
-                                    classroom: '{{ old('classroom', 101) }}',
+                                    teacherName: 'Docente por asignar',
+                                    classroom: '{{ old('classroom', '') }}',
                                     capacity: '{{ old('max_capacity', 50) }}',
                                     startDate: '{{ old('start_date', $defaultStart) }}',
                                     endDate: '{{ old('end_date', $defaultEnd) }}',
@@ -165,8 +165,8 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-2.5">
                                     <div>
-                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nº Aula *</label>
-                                        <input type="number" name="classroom" min="1" max="9999" x-model="classroom" required
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nº Aula <span class="text-slate-400 font-normal">(opcional)</span></label>
+                                        <input type="number" name="classroom" min="1" max="9999" x-model="classroom" placeholder="Asignar luego"
                                             class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
                                     </div>
                                     <div>
@@ -177,19 +177,29 @@
                                 </div>
                             </div>
 
-                            <!-- Paso 4: Lista de docentes de esa facultad mostrando choques -->
+                            <!-- Paso 4: Lista de docentes de esa facultad mostrando choques (opcional: asignable después) -->
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
                                     4. Docentes de la Facultad ({{ \App\Models\Semester::ALL_MONTHS[$selectedMonth] }} · Turno
-                                    {{ \App\Models\Career::SHIFTS[$selectedShift] }})
+                                    {{ \App\Models\Career::SHIFTS[$selectedShift] }}) — Opcional
                                 </label>
                                 <div class="space-y-2">
+                                    <label class="flex items-center justify-between gap-3 p-3 rounded-xl border border-dashed border-slate-300 hover:border-[#0F2744] cursor-pointer bg-slate-50">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" name="teacher_id" value="" checked @change="teacherName = 'Docente por asignar'">
+                                            <div>
+                                                <div class="font-semibold text-sm text-slate-700">Sin docente asignado (asignar después)</div>
+                                                <div class="text-xs text-slate-500">Podrás asignar o cambiar docente y aula desde "Ofertas habilitadas → Editar".</div>
+                                            </div>
+                                        </div>
+                                        <span class="px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 text-xs font-semibold">Opcional</span>
+                                    </label>
                                     @forelse($teachersAvailability as $entry)
                                         @php $t = $entry['teacher']; @endphp
                                         <label
                                             class="flex items-center justify-between gap-3 p-3 rounded-xl border {{ $entry['available'] ? 'border-slate-200 hover:border-[#0F2744] cursor-pointer bg-white' : 'border-rose-200 bg-rose-50/70 opacity-75 cursor-not-allowed' }}">
                                             <div class="flex items-center gap-3">
-                                                <input type="radio" name="teacher_id" value="{{ $t->id }}" {{ $entry['available'] ? '' : 'disabled' }} @change="teacherName = '{{ addslashes($t->name) }}'" required>
+                                                <input type="radio" name="teacher_id" value="{{ $t->id }}" {{ $entry['available'] ? '' : 'disabled' }} @change="teacherName = '{{ addslashes($t->name) }}'">
                                                 <div>
                                                     <div class="font-semibold text-sm text-slate-800">{{ $t->name }}</div>
                                                     <div class="text-xs text-slate-500">{{ $t->code }} · {{ $t->email }}</div>
@@ -204,8 +214,8 @@
                                             @endif
                                         </label>
                                     @empty
-                                        <div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
-                                            No hay docentes registrados en esta facultad.
+                                        <div class="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                                            No hay docentes asignados aún a esta facultad. Puedes habilitar la oferta sin docente y asignarlo luego.
                                         </div>
                                     @endforelse
                                 </div>
@@ -253,7 +263,7 @@
                                         </div>
                                         <div class="flex justify-between">
                                             <dt class="text-slate-500">Aula / Cupo:</dt>
-                                            <dd class="font-semibold">Aula <span x-text="classroom"></span> · <span
+                                            <dd class="font-semibold"><span x-text="classroom ? ('Aula ' + classroom) : 'Aula por asignar'"></span> · <span
                                                     x-text="capacity"></span> alumnos</dd>
                                         </div>
                                     </dl>
@@ -340,8 +350,8 @@
                                     {{ $off->start_date->format('d/m/Y') }}<br>{{ $off->end_date->format('d/m/Y') }}
                                 </td>
                                 <td class="px-3 py-3 text-xs">
-                                    <div class="font-semibold text-slate-700">{{ $off->teacher->name }}</div>
-                                    <div class="text-slate-500">Aula {{ $off->classroom }}</div>
+                                    <div class="font-semibold {{ $off->teacher ? 'text-slate-700' : 'text-amber-700 italic' }}">{{ $off->teacherLabel() }}</div>
+                                    <div class="{{ $off->classroom ? 'text-slate-500' : 'text-amber-700 italic' }}">{{ $off->classroomLabel() }}</div>
                                 </td>
                                 <td class="px-3 py-3 text-center text-xs font-bold">{{ $off->active_enrollments_count }} /
                                     {{ $off->max_capacity }}</td>

@@ -18,8 +18,8 @@
         @method('PUT')
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Número de Aula *</label>
-                <input type="number" name="classroom" min="1" max="9999" value="{{ old('classroom', $offering->classroom) }}" required
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Número de Aula <span class="text-slate-400 font-normal">(opcional)</span></label>
+                <input type="number" name="classroom" min="1" max="9999" value="{{ old('classroom', $offering->classroom) }}" placeholder="Por asignar"
                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
             </div>
             <div>
@@ -30,15 +30,22 @@
         </div>
 
         <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-2">Docente asignado (Facultad: {{ $offering->subject->faculty->name }}) *</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-2">Docente asignado (Facultad: {{ $offering->subject->faculty->name }}) — Opcional</label>
             <div class="space-y-2">
+                <label class="flex items-center justify-between gap-3 p-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="teacher_id" value="" @checked(old('teacher_id', $offering->teacher_id) === null || old('teacher_id', $offering->teacher_id) === '')>
+                        <span class="text-sm font-semibold text-slate-700">Sin docente asignado (pendiente)</span>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-500">Opcional</span>
+                </label>
                 @foreach($teachersAvailability as $entry)
                     @php $t = $entry['teacher']; @endphp
                     <label class="flex items-center justify-between gap-3 p-3 rounded-xl border {{ $entry['available'] ? 'border-slate-200 bg-white cursor-pointer' : 'border-rose-200 bg-rose-50 opacity-75 cursor-not-allowed' }}">
                         <div class="flex items-center gap-3">
                             <input type="radio" name="teacher_id" value="{{ $t->id }}"
-                                   @checked(old('teacher_id', $offering->teacher_id) == $t->id)
-                                   {{ $entry['available'] ? '' : 'disabled' }} required>
+                                   @checked((string) old('teacher_id', $offering->teacher_id) === (string) $t->id)
+                                   {{ $entry['available'] ? '' : 'disabled' }}>
                             <span class="text-sm font-semibold text-slate-800">{{ $t->name }} ({{ $t->code }})</span>
                         </div>
                         <span class="text-xs font-semibold {{ $entry['available'] ? 'text-emerald-700' : 'text-rose-700' }}">

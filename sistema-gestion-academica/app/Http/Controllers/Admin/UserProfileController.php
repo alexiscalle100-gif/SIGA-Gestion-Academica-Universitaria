@@ -33,7 +33,7 @@ class UserProfileController extends Controller
         $role = $request->string('role')->trim()->toString() ?: null;
         $search = $request->string('search')->trim()->toString() ?: null;
 
-        $users = User::with(['faculty', 'career.faculty'])
+        $users = User::with(['faculty', 'faculties', 'career.faculty', 'careers'])
             ->when($role, fn ($q) => $q->where('role', $role))
             ->when($search, fn ($q) => $q->where(fn ($i) => $i->where('name', 'like', "%{$search}%")
                 ->orWhere('email', 'like', "%{$search}%")
@@ -92,6 +92,9 @@ class UserProfileController extends Controller
         if ($user->isStudent() && $user->career_id) {
             $user->careers()->syncWithoutDetaching([$user->career_id => ['is_primary' => true, 'is_active' => true]]);
         }
+        if ($user->isTeacher() && $user->faculty_id) {
+            $user->faculties()->syncWithoutDetaching([$user->faculty_id => ['is_primary' => true]]);
+        }
 
         $this->notifications->logActivity($request->user()->id, 'usuario_creado', "Usuario creado: {$user->name} ({$user->roleLabel()}).");
 
@@ -146,12 +149,91 @@ class UserProfileController extends Controller
         }
 
         if ($user->isTeacher()) {
+            $user->load('faculties');
             $teachingHistory = $this->offerings->getForTeacher($user);
+            $teacherFaculties = $user->assignedFaculties();
+            $allFaculties = Faculty::where('is_active', true)->orderBy('name')->get();
 
-            return view('admin.users.show-teacher', compact('user', 'tab', 'teachingHistory'));
+            return view('admin.users.show-teacher', compact('user', 'tab', 'teachingHistory', 'teacherFaculties', 'allFaculties'));
         }
 
-        return view('admin.users.show-teacher', ['user' => $user, 'tab' => 'perfil', 'teachingHistory' => collect()]);
+        return view('admin.users.show-teacher', [
+            'user' => $user,
+            'tab' => 'perfil',
+            'teachingHistory' => collect(),
+            'teacherFaculties' => collect(),
+            'allFaculties' => collect(),
+        ]);
+    }
+
+    /**
+     * Solo el Administrador puede modificar los datos personales de estudiantes y docentes.
+     */
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'min:3', 'max:120'],
+            'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
+            'document_number' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        $user->update([
+            'name' => trim($validated['name']),
+            'email' => strtolower(trim($validated['email'])),
+            'document_number' => array_key_exists('document_number', $validated)
+                ? ($validated['document_number'] !== null && trim($validated['document_number']) !== '' ? trim($validated['document_number']) : null)
+                : $user->document_number,
+            'phone' => array_key_exists('phone', $validated)
+                ? ($validated['phone'] !== null && trim($validated['phone']) !== '' ? trim($validated['phone']) : null)
+                : $user->phone,
+        ]);
+
+        $this->notifications->logActivity(
+            $request->user()->id,
+            'usuario_actualizado',
+            "Datos personales actualizados por Administración para {$user->name} ({$user->roleLabel()})."
+        );
+
+        return back()->with('success', "Datos personales de \"{$user->name}\" actualizados correctamente.");
+    }
+
+    /**
+     * Permite al Administrador asignar múltiples facultades a un docente.
+     */
+    public function syncFaculties(Request $request, User $user): RedirectResponse
+    {
+        if (! $user->isTeacher()) {
+            abort(403, 'Solo los usuarios con rol Docente pueden tener facultades asignadas.');
+        }
+
+        $validated = $request->validate([
+            'faculty_ids' => ['required', 'array', 'min:1'],
+            'faculty_ids.*' => ['integer', 'exists:faculties,id'],
+        ], [
+            'faculty_ids.required' => 'El docente debe tener al menos una facultad asignada.',
+            'faculty_ids.min' => 'El docente debe tener al menos una facultad asignada.',
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', $validated['faculty_ids'])));
+        $primaryId = in_array((int) $user->faculty_id, $ids, true) ? (int) $user->faculty_id : $ids[0];
+
+        $syncPayload = [];
+        foreach ($ids as $fid) {
+            $syncPayload[$fid] = ['is_primary' => $fid === $primaryId];
+        }
+
+        $user->faculties()->sync($syncPayload);
+        $user->update(['faculty_id' => $primaryId]);
+
+        $facNames = Faculty::whereIn('id', $ids)->orderBy('name')->pluck('name')->implode(', ');
+        $this->notifications->logActivity(
+            $request->user()->id,
+            'docente_facultades_actualizadas',
+            "Facultades actualizadas para el docente {$user->name}: {$facNames}."
+        );
+
+        return back()->with('success', "Facultades actualizadas para {$user->name}: {$facNames}.");
     }
 
     public function addCareer(Request $request, User $user): RedirectResponse

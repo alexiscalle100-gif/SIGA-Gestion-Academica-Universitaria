@@ -20,7 +20,7 @@ class ProfileController extends Controller
 
     public function show(Request $request): View
     {
-        $user = $request->user()->load(['faculty', 'career.faculty']);
+        $user = $request->user()->load(['faculty', 'faculties', 'career.faculty', 'careers.faculty']);
         $teacherHistory = $user->isTeacher() ? $this->offerings->getForTeacher($user) : collect();
 
         return view('profile.show', compact('user', 'teacherHistory'));
@@ -30,7 +30,10 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // Estudiantes solo pueden actualizar datos básicos de contacto y contraseña (no cambiar carrera/rol)
+        if ($user->isStudent()) {
+            abort(403, 'Los datos personales del estudiante solo pueden ser modificados por Administración.');
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:3', 'max:120'],
             'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],

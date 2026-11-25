@@ -5,7 +5,7 @@
 
 @section('content')
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <a href="{{ route('student.enrollments.index') }}"
+        <a href="{{ route('student.enrollments.index', ['career_id' => $enrollment->career_id]) }}"
             class="text-xs font-semibold text-slate-600 hover:text-[#0F2744]">← Volver a Mis Cursos</a>
         <span
             class="px-3 py-1 rounded-full text-xs font-bold
@@ -23,9 +23,9 @@
         </div>
         <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <div class="text-xs font-semibold uppercase text-slate-500">Docente y Horario</div>
-            <div class="mt-1 text-base font-bold text-slate-800">{{ $enrollment->offering->teacher->name }}</div>
+            <div class="mt-1 text-base font-bold text-slate-800">{{ $enrollment->offering->teacherLabel() }}</div>
             <div class="text-xs text-slate-500">{{ $enrollment->offering->monthLabel() }} ·
-                {{ $enrollment->offering->scheduleText() }} · Aula {{ $enrollment->offering->classroom }}</div>
+                {{ $enrollment->offering->scheduleText() }} · {{ $enrollment->offering->classroomLabel() }}</div>
         </div>
         <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <div class="text-xs font-semibold uppercase text-slate-500">Puntos Evaluados en Plan</div>
@@ -36,15 +36,15 @@
 
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-200">
-            <h2 class="font-bold text-[#0F2744]">Actividades del Módulo (Calificadas exclusivamente por el docente)</h2>
+            <h2 class="font-bold text-[#0F2744]">Actividades y Calificaciones (Registradas exclusivamente por el docente)</h2>
         </div>
         <table class="w-full text-sm text-left">
             <thead class="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-200">
                 <tr>
                     <th class="px-5 py-3">Actividad</th>
-                    <th class="px-3 py-3 text-center">Entrega</th>
-                    <th class="px-3 py-3 text-center">Presentación</th>
-                    <th class="px-3 py-3 text-center">Tu Nota</th>
+                    <th class="px-3 py-3 text-center">Fecha Entrega</th>
+                    <th class="px-3 py-3 text-center">Estado de Entrega</th>
+                    <th class="px-3 py-3 text-center">Nota</th>
                     <th class="px-5 py-3">Comentario del Docente</th>
                 </tr>
             </thead>
@@ -64,25 +64,13 @@
                             @if($tg && $tg->isSubmitted())
                                 <span class="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 text-xs font-bold">Presentada</span>
                                 <div class="text-[10px] text-slate-400 mt-0.5">{{ $tg->submitted_at->format('d/m/Y H:i') }}</div>
-                            @elseif($enrollment->status === 'en_curso' && !$enrollment->offering->isManuallyClosed())
-                                <form method="POST" action="{{ route('student.tasks.submit', [$enrollment, $task]) }}"
-                                    class="flex flex-col items-center gap-1.5">
-                                    @csrf
-                                    <input type="text" name="submission_note" placeholder="Nota breve (opcional)"
-                                        class="w-36 px-2 py-1 rounded border border-slate-300 text-[11px]">
-                                    <button type="submit"
-                                        class="px-3 py-1 rounded-lg bg-[#0F2744] hover:bg-[#1E3A5F] text-white text-[11px] font-bold cursor-pointer">
-                                        Marcar Presentada
-                                    </button>
-                                </form>
                             @else
-                                <span class="text-xs text-slate-400">No presentada</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-xs font-semibold">Pendiente</span>
                             @endif
                         </td>
                         <td class="px-3 py-3.5 text-center">
                             @if($tg === null || $tg->score === null)
-                                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Pendiente
-                                    de calificar</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Pendiente de calificar</span>
                             @else
                                 <span class="font-bold text-[#0F2744]">{{ $tg->score }} / {{ $task->max_points }}</span>
                             @endif
@@ -91,8 +79,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="p-8 text-center text-slate-500">El docente aún no registró actividades para esta
-                            materia.</td>
+                        <td colspan="5" class="p-8 text-center text-slate-500">El docente aún no registró actividades para esta materia.</td>
                     </tr>
                 @endforelse
             </tbody>

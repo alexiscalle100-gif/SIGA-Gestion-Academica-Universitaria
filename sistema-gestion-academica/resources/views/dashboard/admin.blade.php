@@ -68,8 +68,8 @@
                                 <div>{{ $off->shiftLabel() }}</div>
                             </td>
                             <td class="px-4 py-3 text-xs text-slate-600">
-                                <div>{{ $off->teacher->name }}</div>
-                                <div class="text-slate-400">Aula {{ $off->classroom }}</div>
+                                <div class="{{ $off->teacher ? '' : 'text-amber-700 italic' }}">{{ $off->teacherLabel() }}</div>
+                                <div class="{{ $off->classroom ? 'text-slate-400' : 'text-amber-700 italic' }}">{{ $off->classroomLabel() }}</div>
                             </td>
                             <td class="px-4 py-3 text-center text-xs font-semibold">{{ $off->active_enrollments_count }}/{{ $off->max_capacity }}</td>
                             <td class="px-4 py-3 text-center">

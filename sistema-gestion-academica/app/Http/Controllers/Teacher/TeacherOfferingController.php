@@ -106,12 +106,14 @@ class TeacherOfferingController extends Controller
         $request->validate([
             'score' => ['nullable', 'integer', 'min:0', 'max:' . $task->max_points],
             'comment' => ['nullable', 'string', 'max:500'],
+            'is_submitted' => ['nullable', 'in:0,1'],
         ], [
             'score.integer' => 'La nota debe ser un número entero.',
             'score.max' => "La nota no puede exceder el puntaje máximo de la tarea ({$task->max_points}).",
         ]);
 
-        $this->gradingService->gradeTask($task, $enrollment, $request->user(), $score, $request->input('comment'));
+        $isSubmitted = $request->has('is_submitted') ? $request->boolean('is_submitted') : null;
+        $this->gradingService->gradeTask($task, $enrollment, $request->user(), $score, $request->input('comment'), $isSubmitted);
 
         return redirect()->route('teacher.offerings.show', [$task->offering_id, 'tab' => 'calificaciones'])
             ->with('success', 'Calificación guardada para ' . $enrollment->student->name . '.');

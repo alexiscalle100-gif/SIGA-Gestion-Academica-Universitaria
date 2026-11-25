@@ -77,6 +77,35 @@ class User extends Authenticatable
         return $this->belongsTo(Faculty::class);
     }
 
+    /**
+     * Facultades asignadas al docente (un docente puede dictar en múltiples facultades).
+     */
+    public function faculties(): BelongsToMany
+    {
+        return $this->belongsToMany(Faculty::class, 'teacher_faculties', 'teacher_id', 'faculty_id')
+            ->withPivot(['is_primary'])
+            ->withTimestamps();
+    }
+
+    public function assignedFaculties()
+    {
+        $list = $this->faculties()->orderByPivot('is_primary', 'desc')->orderBy('name')->get();
+        if ($list->isEmpty() && $this->faculty) {
+            return collect([$this->faculty]);
+        }
+
+        return $list;
+    }
+
+    public function belongsToFaculty(int $facultyId): bool
+    {
+        if ((int) $this->faculty_id === $facultyId) {
+            return true;
+        }
+
+        return $this->faculties()->where('faculties.id', $facultyId)->exists();
+    }
+
     public function career(): BelongsTo
     {
         return $this->belongsTo(Career::class);

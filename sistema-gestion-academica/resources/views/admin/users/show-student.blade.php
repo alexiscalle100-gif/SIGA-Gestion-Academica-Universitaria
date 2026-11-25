@@ -23,14 +23,36 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
             <div>
-                <h2 class="font-bold text-[#0F2744] mb-3">Datos Personales</h2>
-                <dl class="space-y-2 text-sm">
-                    <div class="flex justify-between"><dt class="text-slate-500">Nombre:</dt><dd class="font-semibold">{{ $user->name }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-slate-500">Código:</dt><dd class="font-mono font-semibold">{{ $user->code }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-slate-500">Correo:</dt><dd>{{ $user->email }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-slate-500">Documento / CI:</dt><dd>{{ $user->document_number ?? '—' }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-slate-500">Teléfono:</dt><dd>{{ $user->phone ?? '—' }}</dd></div>
-                </dl>
+                <h2 class="font-bold text-[#0F2744] mb-3">Datos Personales (Modificables solo por Administración)</h2>
+                <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-3 text-xs">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Nombre completo *</label>
+                            <input type="text" name="name" value="{{ old('name', $user->name) }}" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Código</label>
+                            <input type="text" value="{{ $user->code }}" disabled class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 font-mono text-sm text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Correo electrónico *</label>
+                            <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Documento / CI</label>
+                            <input type="text" name="document_number" value="{{ old('document_number', $user->document_number) }}" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block font-semibold text-slate-600 mb-1">Teléfono</label>
+                            <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-[#0F2744] hover:bg-[#1E3A5F] text-white text-xs font-bold cursor-pointer">
+                        Guardar Datos del Estudiante
+                    </button>
+                </form>
             </div>
 
             <div class="pt-4 border-t border-slate-200">

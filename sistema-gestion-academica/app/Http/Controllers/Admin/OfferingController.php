@@ -107,14 +107,14 @@ class OfferingController extends Controller
             'end_time' => ['nullable', 'date_format:H:i'],
             'days_label' => ['nullable', 'string', 'max:40'],
             'max_capacity' => ['required', 'integer', 'min:1', 'max:' . Offering::MAX_ROOM_CAPACITY],
-            'teacher_id' => ['required', 'exists:users,id'],
-            'classroom' => ['required', 'integer', 'min:1', 'max:9999'],
+            'teacher_id' => ['nullable', 'exists:users,id'],
+            'classroom' => ['nullable', 'integer', 'min:1', 'max:9999'],
         ]);
 
         $offering = $this->offeringService->createOffering($validated, $request->user());
 
         return redirect()->route('admin.offerings.index', ['tab' => 'ofertas', 'f_semester' => $offering->semester_id])
-            ->with('success', "Oferta habilitada correctamente: {$offering->subject->code} ({$offering->monthLabel()} · {$offering->shiftLabel()} · Aula {$offering->classroom}).");
+            ->with('success', "Oferta habilitada correctamente: {$offering->subject->code} ({$offering->monthLabel()} · {$offering->shiftLabel()} · {$offering->classroomLabel()} · {$offering->teacherLabel()}).");
     }
 
     public function edit(Offering $offering): View
@@ -138,8 +138,8 @@ class OfferingController extends Controller
     public function update(Request $request, Offering $offering): RedirectResponse
     {
         $validated = $request->validate([
-            'teacher_id' => ['required', 'exists:users,id'],
-            'classroom' => ['required', 'integer', 'min:1', 'max:9999'],
+            'teacher_id' => ['nullable', 'exists:users,id'],
+            'classroom' => ['nullable', 'integer', 'min:1', 'max:9999'],
             'max_capacity' => ['required', 'integer', 'min:1', 'max:' . Offering::MAX_ROOM_CAPACITY],
         ]);
 

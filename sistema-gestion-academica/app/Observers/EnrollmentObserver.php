@@ -22,7 +22,7 @@ class EnrollmentObserver
         $this->notifications->notify(
             $student,
             'Inscripción confirmada',
-            "Te inscribiste en {$offering->subject->code} - {$offering->subject->name} (Intento #{$enrollment->attempt_number}, {$offering->monthLabel()} · turno {$offering->shiftLabel()}, Aula {$offering->classroom}).",
+            "Te inscribiste en {$offering->subject->code} - {$offering->subject->name} (Intento #{$enrollment->attempt_number}, {$offering->monthLabel()} · turno {$offering->shiftLabel()}, {$offering->classroomLabel()}).",
             'inscripcion',
             route('student.enrollments.show', $enrollment)
         );

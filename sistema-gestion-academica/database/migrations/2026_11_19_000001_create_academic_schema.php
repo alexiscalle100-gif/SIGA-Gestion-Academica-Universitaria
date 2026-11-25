@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->string('name', 160);
             $table->json('shifts'); // ['manana', 'tarde', 'noche']
             $table->text('description')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->boolean('is_active')->default(false); // Inicia inhabilitada hasta aprobación administrativa
             $table->timestamps();
         });
 
@@ -48,6 +48,17 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->unique(['student_id', 'career_id'], 'student_careers_unique');
+        });
+
+        // Soporte para Docentes asignados a múltiples facultades
+        Schema::create('teacher_faculties', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('teacher_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('faculty_id')->constrained('faculties')->cascadeOnDelete();
+            $table->boolean('is_primary')->default(false);
+            $table->timestamps();
+
+            $table->unique(['teacher_id', 'faculty_id'], 'teacher_faculties_unique');
         });
 
         Schema::create('subjects', function (Blueprint $table) {
@@ -124,8 +135,8 @@ return new class extends Migration {
             $table->string('end_time', 5)->default('11:30');   // Hora fin turno
             $table->string('days_label', 40)->default('Lunes a Viernes');
             $table->unsignedTinyInteger('max_capacity')->default(50);
-            $table->foreignId('teacher_id')->constrained('users')->restrictOnDelete();
-            $table->unsignedSmallInteger('classroom'); // Solo un número de aula
+            $table->foreignId('teacher_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->unsignedSmallInteger('classroom')->nullable(); // Opcional al habilitar; asignable luego
             $table->boolean('is_disabled')->default(false);
             $table->timestamp('closed_at')->nullable();
             $table->foreignId('closed_by')->nullable()->constrained('users')->nullOnDelete();
@@ -230,6 +241,7 @@ return new class extends Migration {
         Schema::dropIfExists('curriculum_prerequisites');
         Schema::dropIfExists('curriculum_items');
         Schema::dropIfExists('subjects');
+        Schema::dropIfExists('teacher_faculties');
         Schema::dropIfExists('student_careers');
 
         Schema::table('users', function (Blueprint $table) {

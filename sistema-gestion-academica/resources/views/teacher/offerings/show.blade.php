@@ -8,7 +8,7 @@
     <div class="flex flex-wrap items-center gap-2 text-xs">
         <a href="{{ route('teacher.offerings.index') }}" class="font-semibold text-slate-600 hover:text-[#0F2744]">← Mis Materias</a>
         <span class="text-slate-300">|</span>
-        <span class="px-2.5 py-1 rounded-full bg-slate-100 font-semibold text-slate-700">{{ $offering->semester->code }} · {{ $offering->monthLabel() }} · {{ $offering->scheduleText() }} · Aula {{ $offering->classroom }}</span>
+        <span class="px-2.5 py-1 rounded-full bg-slate-100 font-semibold text-slate-700">{{ $offering->semester->code }} · {{ $offering->monthLabel() }} · {{ $offering->scheduleText() }} · {{ $offering->classroomLabel() }}</span>
         <span class="px-2.5 py-1 rounded-full font-bold {{ $totalTaskPoints === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
             Tareas: {{ $totalTaskPoints }} / 100 pts
         </span>
@@ -255,15 +255,11 @@
                                             <div class="text-[11px] text-slate-500">{{ $enrCar?->code ?? '—' }} · {{ $enrCar?->name ?? '—' }}</div>
                                         </td>
                                         <td class="px-3 py-3 text-center">
-                                            @if($tg && $tg->isSubmitted())
-                                                <span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[11px] font-bold">Presentada</span>
-                                                <div class="text-[10px] text-slate-400 mt-0.5">{{ $tg->submitted_at->format('d/m H:i') }}</div>
-                                                @if($tg->submission_note)
-                                                    <div class="text-[10px] text-slate-600 italic truncate max-w-[140px]" title="{{ $tg->submission_note }}">{{ $tg->submission_note }}</div>
-                                                @endif
-                                            @else
-                                                <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-semibold">No presentada</span>
-                                            @endif
+                                            <select name="is_submitted" {{ $offering->isManuallyClosed() ? 'disabled' : '' }}
+                                                    class="px-2 py-1 rounded border border-slate-300 text-xs bg-white font-semibold {{ ($tg && $tg->isSubmitted()) ? 'text-sky-800' : 'text-slate-600' }}">
+                                                <option value="0" @selected(!($tg && $tg->isSubmitted()))>No presentada</option>
+                                                <option value="1" @selected($tg && $tg->isSubmitted())>Presentada</option>
+                                            </select>
                                         </td>
                                         <td class="px-3 py-3 text-center">
                                             @if($tg === null || $tg->score === null)

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Faculty extends Model
@@ -39,10 +40,19 @@ class Faculty extends Model
         return $this->hasMany(User::class)->where('role', User::ROLE_TEACHER);
     }
 
+    public function assignedTeachers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'teacher_faculties', 'faculty_id', 'teacher_id')
+            ->where('users.role', User::ROLE_TEACHER)
+            ->withPivot(['is_primary'])
+            ->withTimestamps();
+    }
+
     public function hasAssociatedData(): bool
     {
         return $this->careers()->exists()
             || $this->subjects()->exists()
-            || $this->teachers()->exists();
+            || $this->teachers()->exists()
+            || $this->assignedTeachers()->exists();
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Offering;
 use App\Models\OfferingTask;
 use App\Models\TaskGrade;
 use App\Models\User;
+use App\Support\AcademicConfigSingleton;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -106,57 +107,18 @@ class TaskGradingService
     }
 
     /**
-     * Permite al estudiante marcar/registrar que ya presentó una actividad para que el docente la califique.
-     * El estudiante nunca puede asignar ni modificar la nota (solo el docente titular califica).
-     */
-    public function submitTask(OfferingTask $task, Enrollment $enrollment, User $student, ?string $note = null): TaskGrade
-    {
-        $offering = $task->offering;
-
-        if (! $student->isStudent() || (int) $enrollment->student_id !== (int) $student->id) {
-            abort(403, 'Solo el estudiante inscrito puede registrar la presentación de su actividad.');
-        }
-
-        if ((int) $enrollment->offering_id !== (int) $offering->id || $enrollment->status !== Enrollment::STATUS_IN_PROGRESS) {
-            throw ValidationException::withMessages([
-                'submission' => 'Esta materia no se encuentra en curso para presentar actividades.',
-            ]);
-        }
-
-        if ($offering->isManuallyClosed() || $offering->is_disabled) {
-            throw ValidationException::withMessages([
-                'submission' => 'La oferta ya fue cerrada o deshabilitada.',
-            ]);
-        }
-
-        $taskGrade = TaskGrade::updateOrCreate(
-            [
-                'offering_task_id' => $task->id,
-                'enrollment_id' => $enrollment->id,
-            ],
-            [
-                'submitted_at' => now(),
-                'submission_note' => $note !== null && trim($note) !== '' ? trim($note) : null,
-            ]
-        );
-
-        $this->notifications->notify(
-            $offering->teacher_id,
-            'Actividad presentada para calificar',
-            "{$student->name} presentó la actividad \"{$task->title}\" en {$offering->subject->code}.",
-            'calificacion',
-            route('teacher.offerings.show', [$offering, 'tab' => 'calificaciones'])
-        );
-
-        return $taskGrade;
-    }
-
-    /**
-     * Registra o actualiza la nota entera de una tarea.
+     * Registra o actualiza la nota entera, el comentario y el estado de presentación de una actividad.
+     * Únicamente el docente titular de la oferta puede modificar notas, comentarios o estado de entrega.
      * Distingue estrictamente "Sin calificar" (score = null) de "Calificada con 0" (score = 0).
      */
-    public function gradeTask(OfferingTask $task, Enrollment $enrollment, User $teacher, ?int $score, ?string $comment): TaskGrade
-    {
+    public function gradeTask(
+        OfferingTask $task,
+        Enrollment $enrollment,
+        User $teacher,
+        ?int $score,
+        ?string $comment,
+        ?bool $isSubmitted = null
+    ): TaskGrade {
         $offering = $task->offering;
         $this->assertTeacherOwnsOffering($teacher, $offering);
 
@@ -176,12 +138,26 @@ class TaskGradingService
             ]);
         }
 
+        $existing = TaskGrade::where('offering_task_id', $task->id)
+            ->where('enrollment_id', $enrollment->id)
+            ->first();
+
+        $submittedAt = $existing?->submitted_at;
+        if ($isSubmitted === true) {
+            $submittedAt = $submittedAt ?? now();
+        } elseif ($isSubmitted === false) {
+            $submittedAt = null;
+        } elseif ($score !== null && $submittedAt === null) {
+            $submittedAt = now();
+        }
+
         $taskGrade = TaskGrade::updateOrCreate(
             [
                 'offering_task_id' => $task->id,
                 'enrollment_id' => $enrollment->id,
             ],
             [
+                'submitted_at' => $submittedAt,
                 'score' => $score,
                 'comment' => $comment !== null && trim($comment) !== '' ? trim($comment) : null,
                 'graded_by' => $score !== null ? $teacher->id : null,
@@ -270,8 +246,9 @@ class TaskGradingService
                     ->whereNotNull('score')
                     ->sum('score');
 
+                $passingScore = AcademicConfigSingleton::getInstance()->passingScore();
                 $score = max(0, min(100, $score));
-                $status = $score >= Enrollment::PASSING_SCORE
+                $status = $score >= $passingScore
                     ? Enrollment::STATUS_PASSED
                     : Enrollment::STATUS_FAILED;
 

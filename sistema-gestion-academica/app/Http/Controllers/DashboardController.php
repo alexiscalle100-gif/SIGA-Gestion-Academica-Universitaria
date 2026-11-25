@@ -59,6 +59,7 @@ class DashboardController extends Controller
         }
 
         if ($user->isTeacher()) {
+            $user->loadMissing(['faculty', 'faculties']);
             $myOfferings = $this->offerings->getForTeacher($user);
             $activeOfferings = $myOfferings->filter(fn(Offering $o) => !$o->is_disabled && !$o->isManuallyClosed());
 
@@ -72,11 +73,12 @@ class DashboardController extends Controller
             return view('dashboard.teacher', compact('user', 'currentSemester', 'myOfferings', 'stats'));
         }
 
-        // Estudiante
+        // Estudiante (corrige orden de parámetros: $referenceDate = null, $careerId = $selectedCareerId)
+        $user->loadMissing(['career.faculty', 'careers.faculty']);
         $studentCareers = $user->activeCareers();
         $selectedCareerId = $request->integer('career_id') ?: null;
-        $portal = $this->enrollmentService->getStudentPortalState($user, $selectedCareerId);
-        $selectedCareer = $portal['selected_career'] ?? $user->career;
+        $portal = $this->enrollmentService->getStudentPortalState($user, null, $selectedCareerId);
+        $selectedCareer = $portal['selected_career'] ?? $studentCareers->first();
 
         $inProgress = Enrollment::query()
             ->where('student_id', $user->id)

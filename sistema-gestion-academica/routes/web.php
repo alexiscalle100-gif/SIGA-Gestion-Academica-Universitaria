@@ -14,7 +14,7 @@ use App\Http\Controllers\Student\StudentPortalController;
 use App\Http\Controllers\Teacher\TeacherOfferingController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => auth()->check() ? redirect()->route('dashboard') : redirect()->route('login'))->name('home');
+Route::get('/', fn () => auth()->check() ? redirect()->route('dashboard') : redirect()->route('login'))->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -46,14 +46,17 @@ Route::middleware('auth')->group(function () {
         Route::put('/facultades/{faculty}', [FacultyController::class, 'update'])->name('faculties.update');
         Route::delete('/facultades/{faculty}', [FacultyController::class, 'destroy'])->name('faculties.destroy');
 
-        // Carreras y visualización de pensum (48 materias)
+        // Carreras y gestión de pensum (aprobar/habilitar, deshabilitar, editar, agregar/quitar materias)
         Route::get('/carreras', [CareerController::class, 'index'])->name('careers.index');
         Route::post('/carreras', [CareerController::class, 'store'])->name('careers.store');
         Route::get('/carreras/{career}', [CareerController::class, 'show'])->name('careers.show');
         Route::put('/carreras/{career}', [CareerController::class, 'update'])->name('careers.update');
+        Route::patch('/carreras/{career}/estado', [CareerController::class, 'toggleStatus'])->name('careers.toggle');
         Route::delete('/carreras/{career}', [CareerController::class, 'destroy'])->name('careers.destroy');
+        Route::post('/carreras/{career}/materias', [CareerController::class, 'addSubject'])->name('careers.subjects.store');
+        Route::delete('/carreras/{career}/materias/{curriculumItem}', [CareerController::class, 'removeSubject'])->name('careers.subjects.destroy');
 
-        // Ofertas (Pestaña "Habilitación de materias" + Pestaña "Ofertas habilitadas")
+        // Ofertas (docente y aula opcionales al habilitar; editables después)
         Route::get('/ofertas', [OfferingController::class, 'index'])->name('offerings.index');
         Route::post('/ofertas', [OfferingController::class, 'store'])->name('offerings.store');
         Route::get('/ofertas/{offering}/editar', [OfferingController::class, 'edit'])->name('offerings.edit');
@@ -65,13 +68,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/matriculas', [TuitionController::class, 'index'])->name('tuitions.index');
         Route::post('/matriculas/estado', [TuitionController::class, 'toggle'])->name('tuitions.toggle');
 
-        // Usuarios y perfiles (Estudiante: Perfil + Récord + Doble Carrera; Docente: Perfil + Historial)
+        // Usuarios y perfiles (edición por Admin, Doble Carrera para estudiantes y Múltiples Facultades para docentes)
         Route::get('/usuarios', [UserProfileController::class, 'index'])->name('users.index');
         Route::post('/usuarios', [UserProfileController::class, 'store'])->name('users.store');
         Route::get('/usuarios/{user}', [UserProfileController::class, 'show'])->name('users.show');
+        Route::put('/usuarios/{user}', [UserProfileController::class, 'update'])->name('users.update');
         Route::patch('/usuarios/{user}/estado', [UserProfileController::class, 'toggleActive'])->name('users.toggle');
         Route::post('/usuarios/{user}/carreras', [UserProfileController::class, 'addCareer'])->name('users.careers.add');
         Route::delete('/usuarios/{user}/carreras/{career}', [UserProfileController::class, 'removeCareer'])->name('users.careers.remove');
+        Route::put('/usuarios/{user}/facultades', [UserProfileController::class, 'syncFaculties'])->name('users.faculties.sync');
     });
 
     // ======================= DOCENTE =======================
@@ -91,7 +96,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/inscripciones', [StudentPortalController::class, 'enrollments'])->name('enrollments.index');
         Route::post('/inscripciones', [StudentPortalController::class, 'storeEnrollment'])->name('enrollments.store');
         Route::get('/mis-materias/{enrollment}', [StudentPortalController::class, 'showEnrollment'])->name('enrollments.show');
-        Route::post('/mis-materias/{enrollment}/tareas/{task}/presentar', [StudentPortalController::class, 'submitTask'])->name('tasks.submit');
         Route::get('/avance-pensum', [StudentPortalController::class, 'progress'])->name('progress');
     });
 });

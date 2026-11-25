@@ -19,7 +19,7 @@
                 <div class="text-xs text-slate-500 mt-1">{{ $off->semester->code }} · {{ $off->monthLabel() }} · {{ $off->scheduleText() }}</div>
                 <dl class="mt-4 space-y-1.5 text-xs text-slate-600">
                     <div class="flex justify-between"><dt class="text-slate-400">Fechas:</dt><dd class="font-semibold">{{ $off->start_date->format('d/m/Y') }} - {{ $off->end_date->format('d/m/Y') }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-slate-400">Aula / Inscritos:</dt><dd class="font-semibold">Aula {{ $off->classroom }} · {{ $off->active_enrollments_count }}/{{ $off->max_capacity }}</dd></div>
+                    <div class="flex justify-between"><dt class="text-slate-400">Aula / Inscritos:</dt><dd class="font-semibold">{{ $off->classroomLabel() }} · {{ $off->active_enrollments_count }}/{{ $off->max_capacity }}</dd></div>
                     <div class="flex justify-between"><dt class="text-slate-400">Puntaje Tareas:</dt><dd class="font-bold {{ $pts === 100 ? 'text-emerald-700' : 'text-amber-600' }}">{{ $pts }} / 100 pts</dd></div>
                 </dl>
             </div>

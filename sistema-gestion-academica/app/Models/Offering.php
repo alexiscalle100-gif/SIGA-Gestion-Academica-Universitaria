@@ -123,6 +123,16 @@ class Offering extends Model
         return Career::SHIFTS[$this->shift] ?? ucfirst($this->shift);
     }
 
+    public function teacherLabel(): string
+    {
+        return $this->teacher?->name ?? 'Docente por asignar';
+    }
+
+    public function classroomLabel(): string
+    {
+        return $this->classroom ? ('Aula ' . $this->classroom) : 'Aula por asignar';
+    }
+
     public function scheduleText(): string
     {
         $start = substr((string) ($this->start_time ?: (Career::SHIFT_SCHEDULES[$this->shift]['start'] ?? '07:30')), 0, 5);

@@ -66,10 +66,10 @@
                                     <h3 class="font-bold text-base text-[#0F2744] mt-1">{{ $off->subject->name }}</h3>
                                     <div class="text-xs text-slate-700 mt-1">
                                         <strong>{{ $off->monthLabel() }}</strong> · <strong
-                                            class="text-sky-800">{{ $off->scheduleText() }}</strong> · Aula {{ $off->classroom }}
+                                            class="text-sky-800">{{ $off->scheduleText() }}</strong> · {{ $off->classroomLabel() }}
                                     </div>
                                     <div class="text-[11px] text-slate-500 mt-0.5">
-                                        Docente: {{ $off->teacher->name }} · Módulo: {{ $off->start_date->format('d/m/Y') }} al
+                                        Docente: {{ $off->teacherLabel() }} · Módulo: {{ $off->start_date->format('d/m/Y') }} al
                                         {{ $off->end_date->format('d/m/Y') }}
                                     </div>
                                     @if($row['has_shift_conflict'])
@@ -96,7 +96,7 @@
                                             Detectado</button>
                                     @else
                                         <button type="button"
-                                            @click="confirmOffering = { id: {{ $off->id }}, code: '{{ $off->subject->code }}', name: '{{ addslashes($off->subject->name) }}', schedule: '{{ addslashes($off->monthLabel() . ' · ' . $off->scheduleText()) }}', teacher: '{{ addslashes($off->teacher->name) }}', dates: '{{ $off->start_date->format('d/m/Y') }} al {{ $off->end_date->format('d/m/Y') }}' }"
+                                            @click="confirmOffering = { id: {{ $off->id }}, code: '{{ $off->subject->code }}', name: '{{ addslashes($off->subject->name) }}', schedule: '{{ addslashes($off->monthLabel() . ' · ' . $off->scheduleText()) }}', teacher: '{{ addslashes($off->teacherLabel()) }}', dates: '{{ $off->start_date->format('d/m/Y') }} al {{ $off->end_date->format('d/m/Y') }}' }"
                                             class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
                                             Inscribirme
                                         </button>
@@ -173,8 +173,7 @@
                                 <div class="font-semibold text-sm text-slate-800 mt-0.5">{{ $enr->offering->subject->name }}
                                 </div>
                                 <div class="text-xs text-slate-500 mt-0.5">{{ $enr->offering->monthLabel() }} ·
-                                    {{ $enr->offering->shiftLabel() }} ({{ $enr->offering->timeRange() }}) · Aula
-                                    {{ $enr->offering->classroom }}</div>
+                                    {{ $enr->offering->shiftLabel() }} ({{ $enr->offering->timeRange() }}) · {{ $enr->offering->classroomLabel() }}</div>
                             </div>
                             <span
                                 class="px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0

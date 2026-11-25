@@ -80,13 +80,24 @@
                                     default => 'No cursada',
                                 };
                             @endphp
-                            <div class="px-4 py-2.5 flex items-center justify-between gap-2 text-xs">
+                            <div class="px-4 py-2.5 flex items-start justify-between gap-2 text-xs">
                                 <div class="min-w-0">
-                                    <div class="flex items-center gap-1.5">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
                                         <span class="text-slate-400 font-bold">M{{ $r['item']->month_in_level }}</span>
                                         <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-bold border {{ $style['bg'] }} {{ $style['text'] }} {{ $style['border'] }}">{{ $subj->code }}</span>
-                                        <span class="font-semibold text-slate-800 truncate">{{ $subj->name }}</span>
+                                        <span class="font-semibold text-slate-800">{{ $subj->name }}</span>
                                     </div>
+                                    @if($r['item']->prerequisites->isNotEmpty() || $r['item']->requires_full_level)
+                                        <div class="mt-1 text-[11px] {{ $r['prereq_missing'] ? 'text-amber-700' : 'text-emerald-700' }}">
+                                            <span class="font-semibold">{{ $r['prereq_missing'] ? 'Requisitos pendientes:' : '✓ Requisitos cumplidos:' }}</span>
+                                            @if($r['item']->requires_full_level)
+                                                <span>Nivel {{ $r['item']->requires_full_level }} completo</span>{{ $r['item']->prerequisites->isNotEmpty() ? ' · ' : '' }}
+                                            @endif
+                                            {{ $r['item']->prerequisites->map(fn($p) => $p->code . ' (' . $p->name . ')')->implode(', ') }}
+                                        </div>
+                                    @else
+                                        <div class="mt-0.5 text-[10px] text-slate-400">Sin prerrequisitos</div>
+                                    @endif
                                 </div>
                                 <span class="px-2 py-0.5 rounded-full text-[11px] font-bold shrink-0 {{ $badgeClass }}">{{ $stLabel }}</span>
                             </div>

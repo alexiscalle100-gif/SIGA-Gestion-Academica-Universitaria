@@ -5,11 +5,9 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
 use App\Models\Offering;
-use App\Models\OfferingTask;
 use App\Services\CurriculumProgressService;
 use App\Services\EnrollmentService;
 use App\Services\SemesterService;
-use App\Services\TaskGradingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +18,6 @@ class StudentPortalController extends Controller
         private readonly EnrollmentService $enrollmentService,
         private readonly CurriculumProgressService $progressService,
         private readonly SemesterService $semesters,
-        private readonly TaskGradingService $gradingService,
     ) {
     }
 
@@ -81,20 +78,6 @@ class StudentPortalController extends Controller
             'accumulatedScore',
             'totalAssignedPoints'
         ));
-    }
-
-    /**
-     * El estudiante marca una actividad como presentada para que solo el docente la califique.
-     */
-    public function submitTask(Request $request, Enrollment $enrollment, OfferingTask $task): RedirectResponse
-    {
-        $validated = $request->validate([
-            'submission_note' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $this->gradingService->submitTask($task, $enrollment, $request->user(), $validated['submission_note'] ?? null);
-
-        return back()->with('success', "Actividad \"{$task->title}\" marcada como presentada. Queda lista para calificación del docente.");
     }
 
     public function progress(Request $request): View

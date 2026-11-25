@@ -107,6 +107,9 @@ class AuthController extends Controller
         if ($user->isStudent() && $user->career_id) {
             $user->careers()->syncWithoutDetaching([$user->career_id => ['is_primary' => true, 'is_active' => true]]);
         }
+        if ($user->isTeacher() && $user->faculty_id) {
+            $user->faculties()->syncWithoutDetaching([$user->faculty_id => ['is_primary' => true]]);
+        }
 
         $this->notifications->notify(
             $user,

@@ -80,8 +80,8 @@ class AcademicReportBuilder
             'meta' => [
                 'Materia' => "{$offering->subject->code} - {$offering->subject->name}",
                 'Semestre / Mes / Turno' => "{$offering->semester->code} · {$offering->monthLabel()} · {$offering->shiftLabel()}",
-                'Docente' => $offering->teacher->name,
-                'Aula' => 'Aula ' . $offering->classroom,
+                'Docente' => $offering->teacherLabel(),
+                'Aula' => $offering->classroomLabel(),
             ],
             'columns' => ['#', 'Código', 'Estudiante', 'Correo', 'Carrera', 'Intento', 'Fecha Inscripción'],
             'rows' => $rows,
@@ -120,7 +120,7 @@ class AcademicReportBuilder
             'meta' => [
                 'Materia' => "{$offering->subject->code} - {$offering->subject->name}",
                 'Periodo' => "{$offering->semester->code} · {$offering->monthLabel()} · {$offering->shiftLabel()}",
-                'Docente' => $offering->teacher->name,
+                'Docente' => $offering->teacherLabel(),
                 'Estado Oferta' => $offering->statusLabel(),
             ],
             'columns' => ['Código', 'Estudiante', 'Intento', 'Acumulado', 'Nota Final', 'Estado'],
@@ -147,7 +147,7 @@ class AcademicReportBuilder
             $o->subject->code,
             $o->subject->name,
             $o->shiftLabel(),
-            'Aula ' . $o->classroom,
+            $o->classroomLabel(),
             "{$o->active_enrollments_count} / {$o->max_capacity}",
             $o->statusLabel(),
         ])->all();
@@ -158,7 +158,7 @@ class AcademicReportBuilder
             'filename' => 'historial_docente_' . ($teacher->code ?? $teacher->id),
             'meta' => [
                 'Docente' => $teacher->name,
-                'Facultad' => $teacher->faculty->name ?? '—',
+                'Facultad(es)' => $teacher->assignedFaculties()->pluck('name')->implode(', ') ?: '—',
             ],
             'columns' => ['Semestre', 'Mes', 'Código', 'Materia', 'Turno', 'Aula', 'Inscritos', 'Estado'],
             'rows' => $rows,
