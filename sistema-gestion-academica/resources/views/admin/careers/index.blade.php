@@ -90,18 +90,22 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3.5 text-right">
+                                @php
+                                    $careerEditPayload = [
+                                        'id' => $career->id,
+                                        'url' => route('admin.careers.update', $career),
+                                        'faculty_id' => (string) $career->faculty_id,
+                                        'code' => $career->code,
+                                        'name' => $career->name,
+                                        'shifts' => $career->shifts ?? [],
+                                        'description' => $career->description ?? '',
+                                    ];
+                                @endphp
                                 <div class="flex items-center justify-end gap-1.5 flex-wrap">
                                     <a href="{{ route('admin.careers.show', $career) }}" class="px-2.5 py-1 rounded bg-sky-100 text-[#0F2744] text-xs font-semibold">Pensum</a>
                                     <button type="button"
-                                            @click='editCareer = @json([
-                                                "id" => $career->id,
-                                                "url" => route("admin.careers.update", $career),
-                                                "faculty_id" => $career->faculty_id,
-                                                "code" => $career->code,
-                                                "name" => $career->name,
-                                                "shifts" => $career->shifts ?? [],
-                                                "description" => $career->description ?? "",
-                                            ])'
+                                            data-career='@json($careerEditPayload)'
+                                            @click="editCareer = JSON.parse($el.dataset.career)"
                                             class="px-2.5 py-1 rounded bg-amber-100 text-amber-800 text-xs font-semibold cursor-pointer">
                                         Editar
                                     </button>
@@ -138,53 +142,55 @@
     </div>
 
     <!-- Modal Editar Carrera -->
-    <div x-show="editCareer" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200" x-if="editCareer">
-            <h3 class="text-lg font-bold text-[#0F2744] mb-4">Modificar Carrera</h3>
-            <form method="POST" :action="editCareer?.url" class="space-y-3">
-                @csrf
-                @method('PUT')
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Facultad *</label>
-                    <select name="faculty_id" :value="editCareer?.faculty_id" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm bg-white">
-                        @foreach($faculties as $fac)
-                            <option value="{{ $fac->id }}">{{ $fac->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="grid grid-cols-3 gap-3">
+    <template x-if="editCareer">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+                <h3 class="text-lg font-bold text-[#0F2744] mb-4">Modificar Carrera</h3>
+                <form method="POST" :action="editCareer.url" class="space-y-3">
+                    @csrf
+                    @method('PUT')
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Código *</label>
-                        <input name="code" type="text" x-model="editCareer.code" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm uppercase">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Facultad *</label>
+                        <select name="faculty_id" x-model="editCareer.faculty_id" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm bg-white">
+                            @foreach($faculties as $fac)
+                                <option value="{{ $fac->id }}">{{ $fac->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    <div class="col-span-2">
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre *</label>
-                        <input name="name" type="text" x-model="editCareer.name" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Código *</label>
+                            <input name="code" type="text" x-model="editCareer.code" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm uppercase">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre *</label>
+                            <input name="name" type="text" x-model="editCareer.name" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Turnos habilitados *</label>
-                    <div class="flex flex-wrap gap-3 text-xs">
-                        @foreach(\App\Models\Career::SHIFTS as $key => $label)
-                            <label class="flex items-center gap-1.5 cursor-pointer">
-                                <input type="checkbox" name="shifts[]" value="{{ $key }}"
-                                       :checked="editCareer?.shifts?.includes('{{ $key }}')"
-                                       class="rounded border-slate-300">
-                                <span>{{ $label }}</span>
-                            </label>
-                        @endforeach
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Turnos habilitados *</label>
+                        <div class="flex flex-wrap gap-3 text-xs">
+                            @foreach(\App\Models\Career::SHIFTS as $key => $label)
+                                <label class="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" name="shifts[]" value="{{ $key }}"
+                                           x-model="editCareer.shifts"
+                                           class="rounded border-slate-300">
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Descripción</label>
-                    <textarea name="description" rows="2" x-model="editCareer.description" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm"></textarea>
-                </div>
-                <div class="pt-3 flex justify-end gap-2">
-                    <button type="button" @click="editCareer = null" class="px-4 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 cursor-pointer">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 rounded-lg bg-[#0F2744] hover:bg-[#1E3A5F] text-white text-sm font-bold cursor-pointer">Guardar Cambios</button>
-                </div>
-            </form>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Descripción</label>
+                        <textarea name="description" rows="2" x-model="editCareer.description" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm"></textarea>
+                    </div>
+                    <div class="pt-3 flex justify-end gap-2">
+                        <button type="button" @click="editCareer = null" class="px-4 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 cursor-pointer">Cancelar</button>
+                        <button type="submit" class="px-5 py-2 rounded-lg bg-[#0F2744] hover:bg-[#1E3A5F] text-white text-sm font-bold cursor-pointer">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    </template>
 </div>
 @endsection

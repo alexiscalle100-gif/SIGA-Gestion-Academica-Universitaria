@@ -243,10 +243,24 @@ class SoftwareQualityKpiTest extends TestCase
 
         // Acceso sin errores al Dashboard e Inscripciones seleccionando la 2da carrera del estudiante (KPI-02 rendimiento)
         $t0 = microtime(true);
+        $this->actingAs($admin)->get(route('admin.careers.index'))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.careers.show', $car1))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.faculties.index'))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.offerings.index'))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.offerings.index', ['tab' => 'ofertas']))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.offerings.edit', $off2))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.tuitions.index'))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.users.index'))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.users.show', $student))->assertStatus(200);
+        $this->actingAs($admin)->get(route('admin.users.show', $teacher))->assertStatus(200);
+        $this->actingAs($teacher)->get(route('dashboard'))->assertStatus(200);
+        $this->actingAs($teacher)->get(route('teacher.offerings.index'))->assertStatus(200);
+        $this->actingAs($teacher)->get(route('teacher.offerings.show', $off2))->assertStatus(200);
         $this->actingAs($student)->get(route('dashboard', ['career_id' => $car2->id]))->assertStatus(200);
         $this->actingAs($student)->get(route('student.enrollments.index', ['career_id' => $car2->id]))->assertStatus(200);
         $this->actingAs($student)->get(route('student.progress', ['career_id' => $car2->id]))->assertStatus(200);
-        $avgMs = ((microtime(true) - $t0) * 1000) / 3;
+        $this->actingAs($student)->get(route('profile.show'))->assertStatus(200);
+        $avgMs = ((microtime(true) - $t0) * 1000) / 17;
 
         $targetMs = AcademicConfigSingleton::getInstance()->kpiTargets()['max_http_response_ms'];
         $this->assertLessThan($targetMs, $avgMs, "El tiempo promedio de respuesta ({$avgMs} ms) superó el KPI de {$targetMs} ms.");
