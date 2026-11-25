@@ -1,0 +1,22 @@
+# Archivos temporales de Windows, Office y respaldos comprimidos
+Thumbs.db
+Desktop.ini
+~$*.docx
+~$*.xlsx
+.DS_Store
+*.zip
+
+# Dependencias, entornos y archivos compilados de Laravel / Node
+sistema-gestion-academica/vendor/
+sistema-gestion-academica/node_modules/
+sistema-gestion-academica/.env
+sistema-gestion-academica/.env.backup
+sistema-gestion-academica/.env.production
+sistema-gestion-academica/public/build/
+sistema-gestion-academica/public/hot
+sistema-gestion-academica/public/storage
+sistema-gestion-academica/storage/*.key
+sistema-gestion-academica/storage/logs/*.log
+sistema-gestion-academica/.phpunit.cache/
+sistema-gestion-academica/.phpunit.result.cache
+*.log
