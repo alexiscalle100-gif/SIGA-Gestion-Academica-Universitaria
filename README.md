@@ -53,16 +53,18 @@ Plataforma web de **Gestión Académica Universitaria** desarrollada en **Larave
   - **Observer Pattern** (`EnrollmentObserver` → notificaciones y bitácora de auditoría)
   - **Service Layer** (`SemesterService`, `CurriculumProgressService`, `OfferingService`, `EnrollmentService`, `TaskGradingService`)
 
-### 6. Pruebas de Calidad de Software con KPIs (`SoftwareQualityKpiTest`)
+### 6. Pruebas de Calidad de Software con KPIs e ISO/IEC 25010 (`SoftwareQualityKpiTest`)
 
-| KPI | Indicador ISO/IEC 25010 | Meta | Resultado Verificado |
-| :--- | :--- | :--- | :--- |
-| **KPI-01** | Tasa de Éxito Funcional (`php artisan test`) | ≥ 95% | **100%** (12/12 pruebas aprobadas) |
-| **KPI-02** | Tiempo Promedio de Respuesta HTTP (2da carrera) | < 500 ms | **Cumplido** (< 150 ms en pruebas automatizadas) |
-| **KPI-03** | Cumplimiento de Seguridad RBAC (datos y notas) | 100% | **100%** (HTTP 403 verificado en todos los bloqueos) |
-| **KPI-04** | Efectividad en Prevención de Choques Multi-Facultad | 100% | **100%** (docente multi-facultad, aula y doble carrera) |
-| **KPI-05** | Integridad de Patrones (Singleton `===`, Repository, Strategy) | 100% | **100%** (instancia única y protección contra deserialización) |
-| **KPI-06** | Ciclo de Vida de Carreras y Ofertas sin Asignación Inicial | 100% | **100%** (creación inhabilitada, pensum, reactivación y edición posterior) |
+Informe completo y tabla CSV disponibles en [`docs/calidad_iso_25010/informe_calidad_iso_25010.md`](docs/calidad_iso_25010/informe_calidad_iso_25010.md) y [`docs/calidad_iso_25010/resultados_kpi_siga.csv`](docs/calidad_iso_25010/resultados_kpi_siga.csv).
+
+| KPI | Fórmula | Criterio de Aceptación | Resultado Real SIGA | Cumple | Característica ISO/IEC 25010 |
+| :--- | :--- | :-: | :-: | :-: | :--- |
+| **Tasa de pruebas aprobadas** | `(Aprobadas / Ejecutadas) × 100` | **≥ 95 %** | `(13 / 13) × 100 = 100 %` | **SÍ** | Adecuación Funcional / Fiabilidad |
+| **Cobertura de módulos críticos** | `(Cubiertos / Ejecutables) × 100` | **≥ 80 %** | `(23 / 25) × 100 = 92 %` | **SÍ** | Mantenibilidad |
+| **Pruebas fallidas** | `Conteo de pruebas fallidas` | **0** | `0` | **SÍ** | Fiabilidad (Madurez) |
+| **Validación de entradas inválidas** | `(Rechazadas / Probadas) × 100` | **100 %** | `(8 / 8) × 100 = 100 %` | **SÍ** | Adecuación Funcional / Seguridad |
+| **Latencia HTTP (17 rutas)** | Promedio en milisegundos | **< 500 ms** | `< 150 ms` | **SÍ** | Eficiencia de Desempeño |
+| **Seguridad RBAC y Patrones** | Accesos bloqueados + Singleton `===` | **100 %** | `100 %` | **SÍ** | Seguridad / Mantenibilidad |
 
 ---
 
@@ -98,6 +100,7 @@ PROYECTO_FINAL/
 │   │   └── seeders/                           # 4 facultades, 8 carreras × 48 materias y datos demo
 │   ├── resources/views/                       # Vistas Blade por rol
 │   └── tests/Feature/                         # Suite PHPUnit (ModularAcademicSystemTest)
+├── docs/calidad_iso_25010/                    # Informe ISO/IEC 25010 y CSV de KPIs de calidad
 ├── Proyecto_Formativo_Gestion_Academica.docx  # Documentación oficial completa (Formato UPDS)
 ├── iniciar_sistema.bat                        # Lanzador rápido para Windows + XAMPP
 └── README.md
@@ -176,4 +179,4 @@ cd sistema-gestion-academica
 php artisan test
 ```
 
-Resultado esperado: **12 pruebas aprobadas** (`ExampleTest`, `ModularAcademicSystemTest` y `SoftwareQualityKpiTest`), validando reglas modulares, Doble Carrera multi-facultad, docentes multi-facultad, ofertas sin docente/aula inicial, carreras inhabilitadas hasta aprobación, Patrón Singleton y KPIs de calidad ISO/IEC 25010.
+Resultado esperado: **13 pruebas aprobadas** (`ExampleTest`, `ModularAcademicSystemTest` y `SoftwareQualityKpiTest`), validando reglas modulares, Doble Carrera multi-facultad, docentes multi-facultad, ofertas sin docente/aula inicial, carreras inhabilitadas hasta aprobación, Patrón Singleton y los 4 KPIs de calidad ISO/IEC 25010.

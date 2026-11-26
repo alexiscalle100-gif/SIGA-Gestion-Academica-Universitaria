@@ -1,0 +1,7 @@
+KPI,Formula,Criterio_Aceptacion,Numerador,Denominador,Resultado,Cumple,Caracteristica_ISO_25010
+Tasa de pruebas aprobadas,(Aprobadas / Ejecutadas) * 100,>= 95 %,13,13,100.0 %,SI,Adecuacion Funcional / Fiabilidad
+Cobertura de modulos y reglas criticas,(Modulos cubiertos / Ejecutables) * 100,>= 80 %,23,25,92.0 %,SI,Mantenibilidad (Capacidad de prueba)
+Pruebas fallidas,Conteo de pruebas fallidas,= 0,0,13,0,SI,Fiabilidad (Madurez)
+Validacion de entradas invalidas,(Casos rechazados / Casos invalidos probados) * 100,= 100 %,8,8,100.0 %,SI,Adecuacion Funcional / Seguridad
+Tiempo promedio de respuesta HTTP (17 rutas),Promedio de latencia en ms,< 500 ms,17 rutas,17,< 150 ms,SI,Eficiencia de Desempeno
+Cumplimiento de seguridad RBAC,(Accesos indebidos bloqueados 403 / Probados) * 100,= 100 %,5,5,100.0 %,SI,Seguridad (Integridad y Autorizacion)

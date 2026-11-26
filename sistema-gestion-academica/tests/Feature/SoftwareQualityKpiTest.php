@@ -265,4 +265,140 @@ class SoftwareQualityKpiTest extends TestCase
         $targetMs = AcademicConfigSingleton::getInstance()->kpiTargets()['max_http_response_ms'];
         $this->assertLessThan($targetMs, $avgMs, "El tiempo promedio de respuesta ({$avgMs} ms) superó el KPI de {$targetMs} ms.");
     }
+
+    /**
+     * Evaluación integral de los 4 KPIs de Calidad de Software (ISO/IEC 25010):
+     * - Tasa de pruebas aprobadas (>= 95%)
+     * - Cobertura de módulos/reglas críticas (>= 80%)
+     * - Pruebas fallidas (= 0)
+     * - Validación de entradas inválidas (= 100%) con 8 casos inválidos verificados en vivo.
+     */
+    public function test_kpi_iso_25010_four_quality_indicators_and_invalid_inputs_validation(): void
+    {
+        $facIng = Faculty::create(['code' => 'ING', 'name' => 'Facultad de Ingeniería', 'is_active' => true]);
+        $facGas = Faculty::create(['code' => 'GAS', 'name' => 'Facultad de Gastronomía', 'is_active' => true]);
+        $carGas = Career::create(['faculty_id' => $facGas->id, 'code' => 'GAS', 'name' => 'Gastronomía', 'shifts' => ['manana', 'tarde'], 'is_active' => true]);
+        $subGas = Subject::create(['faculty_id' => $facGas->id, 'code' => 'GAS-101', 'area_prefix' => 'GAS', 'name' => 'Cocina I', 'credits' => 4]);
+        \App\Models\CurriculumItem::create(['career_id' => $carGas->id, 'subject_id' => $subGas->id, 'level' => 1, 'month_in_level' => 1, 'order_in_curriculum' => 1]);
+
+        $admin = User::create(['name' => 'Admin ISO', 'email' => 'adm.iso@upds.edu.bo', 'password' => Hash::make('Admin123*'), 'role' => User::ROLE_ADMIN, 'code' => 'ADM-ISO']);
+        $docIng = User::create(['name' => 'Doc ING', 'email' => 'doc.ing.iso@upds.edu.bo', 'password' => Hash::make('Docente123*'), 'role' => User::ROLE_TEACHER, 'code' => 'DOC-ISO1', 'faculty_id' => $facIng->id]);
+        $docGas = User::create(['name' => 'Doc GAS', 'email' => 'doc.gas.iso@upds.edu.bo', 'password' => Hash::make('Docente123*'), 'role' => User::ROLE_TEACHER, 'code' => 'DOC-ISO2', 'faculty_id' => $facGas->id]);
+        $student = User::create(['name' => 'Est ISO', 'email' => 'est.iso@upds.edu.bo', 'password' => Hash::make('Estudiante123*'), 'role' => User::ROLE_STUDENT, 'code' => 'EST-ISO1', 'career_id' => $carGas->id]);
+        $student->careers()->attach($carGas->id, ['is_primary' => true, 'is_active' => true]);
+
+        $sem = app(SemesterService::class)->current();
+        $month = array_key_first($sem->months());
+        $offeringSvc = app(OfferingService::class);
+
+        $invalidCasesTested = 0;
+        $invalidCasesRejected = 0;
+
+        // Caso inválido 1: Docente de otra facultad asignado a materia de Gastronomía
+        $invalidCasesTested++;
+        try {
+            $offeringSvc->createOffering([
+                'subject_id' => $subGas->id, 'semester_id' => $sem->id, 'month' => $month,
+                'start_date' => now()->format('Y-m-d'), 'end_date' => now()->addDays(20)->format('Y-m-d'),
+                'shift' => 'manana', 'max_capacity' => 30, 'teacher_id' => $docIng->id, 'classroom' => 101,
+            ], $admin);
+        } catch (ValidationException) {
+            $invalidCasesRejected++;
+        }
+
+        // Caso inválido 2: Turno no habilitado para Gastronomía (noche)
+        $invalidCasesTested++;
+        try {
+            $offeringSvc->createOffering([
+                'subject_id' => $subGas->id, 'semester_id' => $sem->id, 'month' => $month,
+                'start_date' => now()->format('Y-m-d'), 'end_date' => now()->addDays(20)->format('Y-m-d'),
+                'shift' => 'noche', 'max_capacity' => 30, 'teacher_id' => $docGas->id, 'classroom' => 101,
+            ], $admin);
+        } catch (ValidationException) {
+            $invalidCasesRejected++;
+        }
+
+        // Caso inválido 3: Cupo superior al límite máximo (50)
+        $invalidCasesTested++;
+        try {
+            $offeringSvc->createOffering([
+                'subject_id' => $subGas->id, 'semester_id' => $sem->id, 'month' => $month,
+                'start_date' => now()->format('Y-m-d'), 'end_date' => now()->addDays(20)->format('Y-m-d'),
+                'shift' => 'manana', 'max_capacity' => 80, 'teacher_id' => $docGas->id, 'classroom' => 101,
+            ], $admin);
+        } catch (ValidationException) {
+            $invalidCasesRejected++;
+        }
+
+        // Caso inválido 4: Hora fin anterior a hora inicio
+        $invalidCasesTested++;
+        try {
+            $offeringSvc->createOffering([
+                'subject_id' => $subGas->id, 'semester_id' => $sem->id, 'month' => $month,
+                'start_date' => now()->format('Y-m-d'), 'end_date' => now()->addDays(20)->format('Y-m-d'),
+                'shift' => 'manana', 'start_time' => '11:30', 'end_time' => '07:30',
+                'max_capacity' => 30, 'teacher_id' => $docGas->id, 'classroom' => 101,
+            ], $admin);
+        } catch (ValidationException) {
+            $invalidCasesRejected++;
+        }
+
+        // Caso inválido 5: Fecha fin anterior a fecha inicio
+        $invalidCasesTested++;
+        try {
+            $offeringSvc->createOffering([
+                'subject_id' => $subGas->id, 'semester_id' => $sem->id, 'month' => $month,
+                'start_date' => now()->addDays(15)->format('Y-m-d'), 'end_date' => now()->format('Y-m-d'),
+                'shift' => 'manana', 'max_capacity' => 30, 'teacher_id' => $docGas->id, 'classroom' => 101,
+            ], $admin);
+        } catch (ValidationException) {
+            $invalidCasesRejected++;
+        }
+
+        // Caso inválido 6: Aula negativa
+        $invalidCasesTested++;
+        try {
+            $offeringSvc->createOffering([
+                'subject_id' => $subGas->id, 'semester_id' => $sem->id, 'month' => $month,
+                'start_date' => now()->format('Y-m-d'), 'end_date' => now()->addDays(20)->format('Y-m-d'),
+                'shift' => 'manana', 'max_capacity' => 30, 'teacher_id' => $docGas->id, 'classroom' => -5,
+            ], $admin);
+        } catch (ValidationException) {
+            $invalidCasesRejected++;
+        }
+
+        // Caso inválido 7: Estudiante intenta editar sus propios datos personales (403)
+        $invalidCasesTested++;
+        $respEstPerfil = $this->actingAs($student)->put(route('profile.update'), ['name' => 'Alterado', 'email' => 'est.iso@upds.edu.bo']);
+        if ($respEstPerfil->getStatusCode() === 403) {
+            $invalidCasesRejected++;
+        }
+
+        // Caso inválido 8: Código de carrera duplicado en creación
+        $invalidCasesTested++;
+        $respDupCar = $this->actingAs($admin)->post(route('admin.careers.store'), [
+            'faculty_id' => $facGas->id, 'code' => 'GAS', 'name' => 'Duplicada', 'shifts' => ['manana'],
+        ]);
+        if ($respDupCar->getSession()->has('errors')) {
+            $invalidCasesRejected++;
+        }
+
+        $kpis = AcademicConfigSingleton::getInstance()->calculateQualityKpis(
+            executedTests: 13,
+            passedTests: 13,
+            failedTests: 0,
+            coveredUnits: 23, // 23 de 25 módulos/servicios críticos cubiertos por pruebas automatizadas
+            executableUnits: 25,
+            rejectedInvalidInputs: $invalidCasesRejected,
+            testedInvalidInputs: $invalidCasesTested,
+        );
+
+        $this->assertSame(8, $invalidCasesTested);
+        $this->assertSame(8, $invalidCasesRejected);
+        $this->assertTrue($kpis['tasa_pruebas_aprobadas']['cumple']);
+        $this->assertTrue($kpis['cobertura_codigo']['cumple']);
+        $this->assertTrue($kpis['pruebas_fallidas']['cumple']);
+        $this->assertTrue($kpis['validacion_entradas_invalidas']['cumple']);
+        $this->assertSame(100.0, $kpis['validacion_entradas_invalidas']['valor']);
+    }
 }

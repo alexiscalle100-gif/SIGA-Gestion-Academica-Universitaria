@@ -34,6 +34,9 @@ final class AcademicConfigSingleton
             ],
             'kpi_targets' => [
                 'functional_pass_rate_pct' => 95.0,
+                'code_coverage_min_pct' => 80.0,
+                'max_failed_tests' => 0,
+                'invalid_input_rejection_pct' => 100.0,
                 'max_http_response_ms' => 500.0,
                 'rbac_security_compliance_pct' => 100.0,
                 'conflict_prevention_accuracy_pct' => 100.0,
@@ -96,9 +99,61 @@ final class AcademicConfigSingleton
         return $this->settings['shift_schedules'];
     }
 
-    /** @return array<string, float> */
+    /** @return array<string, float|int> */
     public function kpiTargets(): array
     {
         return $this->settings['kpi_targets'];
+    }
+
+    /**
+     * Calcula los 4 KPIs de calidad de software (ISO/IEC 25010) y evalúa su criterio de aceptación:
+     * 1. Tasa de pruebas aprobadas >= 95%
+     * 2. Cobertura de líneas/módulos >= 80%
+     * 3. Pruebas fallidas == 0
+     * 4. Validación de entradas inválidas == 100%
+     *
+     * @return array<string, array{valor: float|int, criterio: string, cumple: bool, iso_25010: string}>
+     */
+    public function calculateQualityKpis(
+        int $executedTests,
+        int $passedTests,
+        int $failedTests,
+        int $coveredUnits,
+        int $executableUnits,
+        int $rejectedInvalidInputs,
+        int $testedInvalidInputs
+    ): array {
+        $passRate = $executedTests > 0 ? round(($passedTests / $executedTests) * 100, 2) : 0.0;
+        $coverageRate = $executableUnits > 0 ? round(($coveredUnits / $executableUnits) * 100, 2) : 0.0;
+        $invalidRejectionRate = $testedInvalidInputs > 0 ? round(($rejectedInvalidInputs / $testedInvalidInputs) * 100, 2) : 0.0;
+
+        $targets = $this->kpiTargets();
+
+        return [
+            'tasa_pruebas_aprobadas' => [
+                'valor' => $passRate,
+                'criterio' => '≥ ' . $targets['functional_pass_rate_pct'] . ' %',
+                'cumple' => $passRate >= $targets['functional_pass_rate_pct'],
+                'iso_25010' => 'Adecuación Funcional / Fiabilidad',
+            ],
+            'cobertura_codigo' => [
+                'valor' => $coverageRate,
+                'criterio' => '≥ ' . $targets['code_coverage_min_pct'] . ' %',
+                'cumple' => $coverageRate >= $targets['code_coverage_min_pct'],
+                'iso_25010' => 'Mantenibilidad (Capacidad de prueba)',
+            ],
+            'pruebas_fallidas' => [
+                'valor' => $failedTests,
+                'criterio' => '= ' . $targets['max_failed_tests'],
+                'cumple' => $failedTests === (int) $targets['max_failed_tests'],
+                'iso_25010' => 'Fiabilidad (Madurez)',
+            ],
+            'validacion_entradas_invalidas' => [
+                'valor' => $invalidRejectionRate,
+                'criterio' => '= ' . $targets['invalid_input_rejection_pct'] . ' %',
+                'cumple' => $invalidRejectionRate >= $targets['invalid_input_rejection_pct'],
+                'iso_25010' => 'Adecuación Funcional / Seguridad',
+            ],
+        ];
     }
 }
