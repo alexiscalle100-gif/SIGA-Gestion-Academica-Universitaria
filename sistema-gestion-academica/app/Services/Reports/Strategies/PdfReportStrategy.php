@@ -15,6 +15,6 @@ class PdfReportStrategy implements ReportExporterStrategy
             'generatedAt' => now()->format('d/m/Y H:i'),
         ])->setPaper('letter', count($reportData['columns']) > 6 ? 'landscape' : 'portrait');
 
-        return $pdf->download($reportData['filename'] . '.pdf');
+        return $pdf->download($reportData['filename'].'.pdf');
     }
 }

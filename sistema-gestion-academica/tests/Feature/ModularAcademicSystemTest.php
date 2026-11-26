@@ -18,7 +18,6 @@ use App\Services\OfferingService;
 use App\Services\SemesterService;
 use App\Services\TaskGradingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -28,18 +27,31 @@ class ModularAcademicSystemTest extends TestCase
     use RefreshDatabase;
 
     private Faculty $facIng;
+
     private Faculty $facGas;
+
     private Career $carSis;
+
     private Career $carGas;
+
     private Semester $semester;
+
     private User $admin;
+
     private User $docIng1;
+
     private User $docIng2;
+
     private User $docGas;
+
     private User $student;
+
     private Subject $mat101;
+
     private Subject $sis101;
+
     private Subject $sis102;
+
     private Subject $gas101;
 
     protected function setUp(): void

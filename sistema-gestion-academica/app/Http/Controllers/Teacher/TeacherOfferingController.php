@@ -45,7 +45,7 @@ class TeacherOfferingController extends Controller
 
         // Distribución de compañeros por Carrera y Facultad (para materias compartidas de niveles 1-3)
         $careerBreakdown = $offering->activeEnrollments
-            ->groupBy(fn (Enrollment $e) => ($e->career?->name ?? $e->student->career?->name ?? 'Sin carrera') . ' · ' . ($e->career?->faculty?->code ?? $e->student->career?->faculty?->code ?? '—'))
+            ->groupBy(fn (Enrollment $e) => ($e->career?->name ?? $e->student->career?->name ?? 'Sin carrera').' · '.($e->career?->faculty?->code ?? $e->student->career?->faculty?->code ?? '—'))
             ->map->count()
             ->sortDesc();
 
@@ -104,7 +104,7 @@ class TeacherOfferingController extends Controller
         $score = ($rawScore === null || $rawScore === '') ? null : (int) $rawScore;
 
         $request->validate([
-            'score' => ['nullable', 'integer', 'min:0', 'max:' . $task->max_points],
+            'score' => ['nullable', 'integer', 'min:0', 'max:'.$task->max_points],
             'comment' => ['nullable', 'string', 'max:500'],
             'is_submitted' => ['nullable', 'in:0,1'],
         ], [
@@ -116,7 +116,7 @@ class TeacherOfferingController extends Controller
         $this->gradingService->gradeTask($task, $enrollment, $request->user(), $score, $request->input('comment'), $isSubmitted);
 
         return redirect()->route('teacher.offerings.show', [$task->offering_id, 'tab' => 'calificaciones'])
-            ->with('success', 'Calificación guardada para ' . $enrollment->student->name . '.');
+            ->with('success', 'Calificación guardada para '.$enrollment->student->name.'.');
     }
 
     public function close(Request $request, Offering $offering): RedirectResponse

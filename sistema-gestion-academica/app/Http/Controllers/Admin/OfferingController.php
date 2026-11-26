@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Career;
 use App\Models\Faculty;
 use App\Models\Offering;
-use App\Models\Semester;
 use App\Models\Subject;
 use App\Repositories\Contracts\OfferingRepositoryInterface;
 use App\Services\OfferingService;
@@ -106,7 +105,7 @@ class OfferingController extends Controller
             'start_time' => ['nullable', 'date_format:H:i'],
             'end_time' => ['nullable', 'date_format:H:i'],
             'days_label' => ['nullable', 'string', 'max:40'],
-            'max_capacity' => ['required', 'integer', 'min:1', 'max:' . Offering::MAX_ROOM_CAPACITY],
+            'max_capacity' => ['required', 'integer', 'min:1', 'max:'.Offering::MAX_ROOM_CAPACITY],
             'teacher_id' => ['nullable', 'exists:users,id'],
             'classroom' => ['nullable', 'integer', 'min:1', 'max:9999'],
         ]);
@@ -140,7 +139,7 @@ class OfferingController extends Controller
         $validated = $request->validate([
             'teacher_id' => ['nullable', 'exists:users,id'],
             'classroom' => ['nullable', 'integer', 'min:1', 'max:9999'],
-            'max_capacity' => ['required', 'integer', 'min:1', 'max:' . Offering::MAX_ROOM_CAPACITY],
+            'max_capacity' => ['required', 'integer', 'min:1', 'max:'.Offering::MAX_ROOM_CAPACITY],
         ]);
 
         $this->offeringService->updateOffering($offering, $validated, $request->user());

@@ -16,7 +16,7 @@ class ExcelReportStrategy implements ReportExporterStrategy
 {
     public function export(array $reportData): Response
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Reporte Académico');
 
@@ -34,7 +34,7 @@ class ExcelReportStrategy implements ReportExporterStrategy
         $sheet->getRowDimension(1)->setRowHeight(28);
 
         $sheet->mergeCells("A2:{$lastCol}2");
-        $sheet->setCellValue('A2', $reportData['title'] . ' — ' . $reportData['subtitle']);
+        $sheet->setCellValue('A2', $reportData['title'].' — '.$reportData['subtitle']);
         $sheet->getStyle('A2')->applyFromArray([
             'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '0F2744']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
@@ -44,7 +44,7 @@ class ExcelReportStrategy implements ReportExporterStrategy
 
         $row = 4;
         foreach ($reportData['meta'] as $label => $value) {
-            $sheet->setCellValue("A{$row}", $label . ':');
+            $sheet->setCellValue("A{$row}", $label.':');
             $sheet->getStyle("A{$row}")->getFont()->setBold(true);
             $sheet->setCellValue("B{$row}", $value);
             $row++;
@@ -111,14 +111,14 @@ class ExcelReportStrategy implements ReportExporterStrategy
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
-        $filename = $reportData['filename'] . '.xlsx';
+        $filename = $reportData['filename'].'.xlsx';
 
         return new StreamedResponse(function () use ($spreadsheet) {
             $writer = new Xlsx($spreadsheet);
             $writer->save('php://output');
         }, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             'Cache-Control' => 'max-age=0',
         ]);
     }

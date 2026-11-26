@@ -15,9 +15,7 @@ use Illuminate\Validation\ValidationException;
 
 class OfferingService
 {
-    public function __construct(private readonly NotificationService $notifications)
-    {
-    }
+    public function __construct(private readonly NotificationService $notifications) {}
 
     /**
      * Crea una oferta académica. Docente y aula son opcionales al habilitar y pueden asignarse/modificarse luego.
@@ -309,7 +307,7 @@ class OfferingService
         if (! in_array($shift, $allowedShifts, true)) {
             $allowedNames = array_map(fn ($s) => Career::SHIFTS[$s] ?? $s, $allowedShifts);
             throw ValidationException::withMessages([
-                'shift' => 'El turno "' . (Career::SHIFTS[$shift] ?? $shift) . '" no está habilitado para las carreras que cursan esta materia. Turnos permitidos: ' . implode(', ', $allowedNames) . '.',
+                'shift' => 'El turno "'.(Career::SHIFTS[$shift] ?? $shift).'" no está habilitado para las carreras que cursan esta materia. Turnos permitidos: '.implode(', ', $allowedNames).'.',
             ]);
         }
 
@@ -317,7 +315,7 @@ class OfferingService
         if ($teacher !== null) {
             if (! $teacher->belongsToFaculty((int) $subject->faculty_id)) {
                 throw ValidationException::withMessages([
-                    'teacher_id' => 'El docente seleccionado no está habilitado en la facultad dueña de esta materia (' . $subject->faculty->name . ').',
+                    'teacher_id' => 'El docente seleccionado no está habilitado en la facultad dueña de esta materia ('.$subject->faculty->name.').',
                 ]);
             }
 

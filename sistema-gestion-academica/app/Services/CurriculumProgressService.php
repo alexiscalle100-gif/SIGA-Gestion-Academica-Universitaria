@@ -111,7 +111,7 @@ class CurriculumProgressService
         }
 
         if (! empty($missing)) {
-            return 'Falta aprobar prerrequisito(s): ' . implode(', ', $missing) . '.';
+            return 'Falta aprobar prerrequisito(s): '.implode(', ', $missing).'.';
         }
 
         return null;

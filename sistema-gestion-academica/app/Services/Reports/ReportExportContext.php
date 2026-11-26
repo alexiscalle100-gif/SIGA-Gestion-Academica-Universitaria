@@ -25,8 +25,8 @@ class ReportExportContext
     public function resolveFormat(string $format): self
     {
         $this->strategy = match (strtolower($format)) {
-            'pdf' => new PdfReportStrategy(),
-            'excel', 'xlsx' => new ExcelReportStrategy(),
+            'pdf' => new PdfReportStrategy,
+            'excel', 'xlsx' => new ExcelReportStrategy,
             default => throw new InvalidArgumentException("Formato de reporte no soportado: {$format}"),
         };
 

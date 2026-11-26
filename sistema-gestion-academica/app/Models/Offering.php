@@ -13,11 +13,15 @@ class Offering extends Model
     use HasFactory;
 
     public const MAX_ROOM_CAPACITY = 50;
+
     public const ENROLLMENT_WINDOW_DAYS = 4;
 
     public const STATUS_ENABLED = 'habilitada';
+
     public const STATUS_IN_PROGRESS = 'en_curso';
+
     public const STATUS_CLOSED = 'cerrada';
+
     public const STATUS_DISABLED = 'deshabilitada';
 
     protected $fillable = [
@@ -130,7 +134,7 @@ class Offering extends Model
 
     public function classroomLabel(): string
     {
-        return $this->classroom ? ('Aula ' . $this->classroom) : 'Aula por asignar';
+        return $this->classroom ? ('Aula '.$this->classroom) : 'Aula por asignar';
     }
 
     public function scheduleText(): string
@@ -176,7 +180,7 @@ class Offering extends Model
 
     public function monthLabel(): string
     {
-        return Semester::ALL_MONTHS[$this->month] ?? ('Mes ' . $this->month);
+        return Semester::ALL_MONTHS[$this->month] ?? ('Mes '.$this->month);
     }
 
     public function isWithinEnrollmentWindow(?Carbon $referenceDate = null): bool

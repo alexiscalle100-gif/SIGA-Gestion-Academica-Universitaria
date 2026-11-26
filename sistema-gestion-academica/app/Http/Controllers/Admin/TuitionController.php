@@ -19,8 +19,7 @@ class TuitionController extends Controller
     public function __construct(
         private readonly SemesterService $semesters,
         private readonly NotificationService $notifications,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {
@@ -33,19 +32,19 @@ class TuitionController extends Controller
         $students = User::query()
             ->where('role', User::ROLE_STUDENT)
             ->with(['career.faculty', 'careers.faculty'])
-            ->when($search, fn($q) => $q->where(fn($i) => $i->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")))
+            ->when($search, fn ($q) => $q->where(fn ($i) => $i->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")))
             ->orderBy('name')
             ->get();
 
         $tuitionsMap = Tuition::where('semester_id', $selectedSemester->id)
             ->get()
-            ->keyBy(fn(Tuition $t) => "{$t->student_id}-{$t->career_id}");
+            ->keyBy(fn (Tuition $t) => "{$t->student_id}-{$t->career_id}");
 
         $usedSlotsMap = Enrollment::query()
             ->where('semester_id', $selectedSemester->id)
             ->where('status', '!=', Enrollment::STATUS_ANNULLED)
             ->get()
-            ->groupBy(fn(Enrollment $e) => "{$e->student_id}-" . ($e->career_id ?? $e->student?->career_id))
+            ->groupBy(fn (Enrollment $e) => "{$e->student_id}-".($e->career_id ?? $e->student?->career_id))
             ->map->count();
 
         $rows = [];
@@ -86,7 +85,7 @@ class TuitionController extends Controller
         $semester = Semester::findOrFail($validated['semester_id']);
         $careerId = $validated['career_id'] ?? $student->career_id;
 
-        if (!$careerId) {
+        if (! $careerId) {
             return back()->with('error', "El estudiante {$student->name} no tiene una carrera asignada.");
         }
 
@@ -119,11 +118,11 @@ class TuitionController extends Controller
         $this->notifications->logActivity(
             $request->user()->id,
             $active ? 'matricula_activada' : 'matricula_desactivada',
-            ($active ? 'Matrícula activada' : 'Matrícula desactivada') . " para {$student->name} ({$semester->code}).",
+            ($active ? 'Matrícula activada' : 'Matrícula desactivada')." para {$student->name} ({$semester->code}).",
             Tuition::class,
             $tuition->id
         );
 
-        return back()->with('success', 'Matrícula de ' . $student->name . ' ' . ($active ? 'activada' : 'desactivada') . " para {$semester->code}.");
+        return back()->with('success', 'Matrícula de '.$student->name.' '.($active ? 'activada' : 'desactivada')." para {$semester->code}.");
     }
 }

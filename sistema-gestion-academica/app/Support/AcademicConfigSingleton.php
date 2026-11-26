@@ -45,9 +45,7 @@ final class AcademicConfigSingleton
         ];
     }
 
-    private function __clone()
-    {
-    }
+    private function __clone() {}
 
     public function __wakeup(): void
     {
@@ -57,7 +55,7 @@ final class AcademicConfigSingleton
     public static function getInstance(): self
     {
         if (self::$instance === null) {
-            self::$instance = new self();
+            self::$instance = new self;
         }
 
         return self::$instance;
@@ -132,25 +130,25 @@ final class AcademicConfigSingleton
         return [
             'tasa_pruebas_aprobadas' => [
                 'valor' => $passRate,
-                'criterio' => '≥ ' . $targets['functional_pass_rate_pct'] . ' %',
+                'criterio' => '≥ '.$targets['functional_pass_rate_pct'].' %',
                 'cumple' => $passRate >= $targets['functional_pass_rate_pct'],
                 'iso_25010' => 'Adecuación Funcional / Fiabilidad',
             ],
             'cobertura_codigo' => [
                 'valor' => $coverageRate,
-                'criterio' => '≥ ' . $targets['code_coverage_min_pct'] . ' %',
+                'criterio' => '≥ '.$targets['code_coverage_min_pct'].' %',
                 'cumple' => $coverageRate >= $targets['code_coverage_min_pct'],
                 'iso_25010' => 'Mantenibilidad (Capacidad de prueba)',
             ],
             'pruebas_fallidas' => [
                 'valor' => $failedTests,
-                'criterio' => '= ' . $targets['max_failed_tests'],
+                'criterio' => '= '.$targets['max_failed_tests'],
                 'cumple' => $failedTests === (int) $targets['max_failed_tests'],
                 'iso_25010' => 'Fiabilidad (Madurez)',
             ],
             'validacion_entradas_invalidas' => [
                 'valor' => $invalidRejectionRate,
-                'criterio' => '= ' . $targets['invalid_input_rejection_pct'] . ' %',
+                'criterio' => '= '.$targets['invalid_input_rejection_pct'].' %',
                 'cumple' => $invalidRejectionRate >= $targets['invalid_input_rejection_pct'],
                 'iso_25010' => 'Adecuación Funcional / Seguridad',
             ],

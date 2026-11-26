@@ -172,11 +172,19 @@ Abre en tu navegador: **http://127.0.0.1:8000**
 
 ---
 
-## Pruebas Automatizadas (PHPUnit)
+## Pruebas Automatizadas, Estilo de Código (Pint) y KPIs ISO/IEC 25010
 
 ```bash
 cd sistema-gestion-academica
+
+# Verificar formato de código PSR-12 / Laravel (0 errores)
+vendor/bin/pint --test
+
+# Ejecutar las 13 pruebas funcionales y de KPIs ISO/IEC 25010
 php artisan test
+
+# O ejecutar toda la verificación completa de calidad en un solo comando:
+composer quality
 ```
 
-Resultado esperado: **13 pruebas aprobadas** (`ExampleTest`, `ModularAcademicSystemTest` y `SoftwareQualityKpiTest`), validando reglas modulares, Doble Carrera multi-facultad, docentes multi-facultad, ofertas sin docente/aula inicial, carreras inhabilitadas hasta aprobación, Patrón Singleton y los 4 KPIs de calidad ISO/IEC 25010.
+Resultado esperado: **Laravel Pint `PASS` (0 problemas de estilo)** y **13 / 13 pruebas aprobadas (107 aserciones, 0 fallidas)** en `ExampleTest`, `ModularAcademicSystemTest` y `SoftwareQualityKpiTest`.

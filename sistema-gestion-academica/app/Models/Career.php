@@ -70,7 +70,7 @@ class Career extends Model
 
     public function shiftLabels(): array
     {
-        return array_map(fn($s) => self::SHIFTS[$s] ?? ucfirst($s), $this->shifts ?? []);
+        return array_map(fn ($s) => self::SHIFTS[$s] ?? ucfirst($s), $this->shifts ?? []);
     }
 
     public function hasAssociatedData(): bool

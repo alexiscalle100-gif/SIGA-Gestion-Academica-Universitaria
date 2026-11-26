@@ -24,8 +24,7 @@ class DashboardController extends Controller
         private readonly OfferingRepositoryInterface $offerings,
         private readonly EnrollmentService $enrollmentService,
         private readonly CurriculumProgressService $progressService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {
@@ -61,13 +60,13 @@ class DashboardController extends Controller
         if ($user->isTeacher()) {
             $user->loadMissing(['faculty', 'faculties']);
             $myOfferings = $this->offerings->getForTeacher($user);
-            $activeOfferings = $myOfferings->filter(fn(Offering $o) => !$o->is_disabled && !$o->isManuallyClosed());
+            $activeOfferings = $myOfferings->filter(fn (Offering $o) => ! $o->is_disabled && ! $o->isManuallyClosed());
 
             $stats = [
                 'total_offerings' => $myOfferings->count(),
                 'active_offerings' => $activeOfferings->count(),
                 'total_students' => $activeOfferings->sum('active_enrollments_count'),
-                'closed_offerings' => $myOfferings->filter(fn(Offering $o) => $o->isManuallyClosed())->count(),
+                'closed_offerings' => $myOfferings->filter(fn (Offering $o) => $o->isManuallyClosed())->count(),
             ];
 
             return view('dashboard.teacher', compact('user', 'currentSemester', 'myOfferings', 'stats'));

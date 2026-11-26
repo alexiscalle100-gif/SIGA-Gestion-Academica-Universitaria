@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Career;
+use App\Models\CurriculumItem;
 use App\Models\Faculty;
-use App\Models\Offering;
 use App\Models\Subject;
 use App\Models\User;
 use App\Repositories\Contracts\OfferingRepositoryInterface;
@@ -279,7 +279,7 @@ class SoftwareQualityKpiTest extends TestCase
         $facGas = Faculty::create(['code' => 'GAS', 'name' => 'Facultad de Gastronomía', 'is_active' => true]);
         $carGas = Career::create(['faculty_id' => $facGas->id, 'code' => 'GAS', 'name' => 'Gastronomía', 'shifts' => ['manana', 'tarde'], 'is_active' => true]);
         $subGas = Subject::create(['faculty_id' => $facGas->id, 'code' => 'GAS-101', 'area_prefix' => 'GAS', 'name' => 'Cocina I', 'credits' => 4]);
-        \App\Models\CurriculumItem::create(['career_id' => $carGas->id, 'subject_id' => $subGas->id, 'level' => 1, 'month_in_level' => 1, 'order_in_curriculum' => 1]);
+        CurriculumItem::create(['career_id' => $carGas->id, 'subject_id' => $subGas->id, 'level' => 1, 'month_in_level' => 1, 'order_in_curriculum' => 1]);
 
         $admin = User::create(['name' => 'Admin ISO', 'email' => 'adm.iso@upds.edu.bo', 'password' => Hash::make('Admin123*'), 'role' => User::ROLE_ADMIN, 'code' => 'ADM-ISO']);
         $docIng = User::create(['name' => 'Doc ING', 'email' => 'doc.ing.iso@upds.edu.bo', 'password' => Hash::make('Docente123*'), 'role' => User::ROLE_TEACHER, 'code' => 'DOC-ISO1', 'faculty_id' => $facIng->id]);

@@ -14,8 +14,11 @@ class Enrollment extends Model
     public const PASSING_SCORE = 51;
 
     public const STATUS_IN_PROGRESS = 'en_curso';
+
     public const STATUS_PASSED = 'aprobada';
+
     public const STATUS_FAILED = 'reprobada';
+
     public const STATUS_ANNULLED = 'anulada';
 
     protected $fillable = [

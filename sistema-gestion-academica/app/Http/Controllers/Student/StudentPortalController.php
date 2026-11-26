@@ -18,8 +18,7 @@ class StudentPortalController extends Controller
         private readonly EnrollmentService $enrollmentService,
         private readonly CurriculumProgressService $progressService,
         private readonly SemesterService $semesters,
-    ) {
-    }
+    ) {}
 
     public function enrollments(Request $request): View
     {

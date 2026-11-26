@@ -28,8 +28,8 @@ class AcademicReportBuilder
 
             return [
                 $item->career->name,
-                'Nivel ' . $item->level,
-                'Mes ' . $item->month_in_level,
+                'Nivel '.$item->level,
+                'Mes '.$item->month_in_level,
                 $item->subject->code,
                 $item->subject->name,
                 $item->subject->credits,
@@ -40,7 +40,7 @@ class AcademicReportBuilder
         return [
             'title' => 'Pensum y Listado de Materias por Carrera',
             'subtitle' => $career ? "{$career->code} - {$career->name}" : 'Todas las carreras registradas',
-            'filename' => 'pensum_materias_' . ($career ? strtolower($career->code) : 'todas'),
+            'filename' => 'pensum_materias_'.($career ? strtolower($career->code) : 'todas'),
             'meta' => [
                 'Carrera' => $career ? "{$career->code} - {$career->name}" : 'Todas las carreras',
                 'Total materias en pensum' => (string) $items->count(),
@@ -65,18 +65,18 @@ class AcademicReportBuilder
 
         $rows = $enrollments->map(fn (Enrollment $e, int $i) => [
             $i + 1,
-            $e->student->code ?? ('EST-' . $e->student->id),
+            $e->student->code ?? ('EST-'.$e->student->id),
             $e->student->name,
             $e->student->email,
             $e->student->career->name ?? '—',
-            'Intento #' . $e->attempt_number,
+            'Intento #'.$e->attempt_number,
             $e->enrolled_at?->format('d/m/Y') ?? '—',
         ])->all();
 
         return [
             'title' => 'Nómina de Estudiantes Inscritos en la Oferta',
             'subtitle' => "{$offering->subject->code} - {$offering->subject->name}",
-            'filename' => 'inscritos_' . strtolower($offering->subject->code) . '_' . $offering->id,
+            'filename' => 'inscritos_'.strtolower($offering->subject->code).'_'.$offering->id,
             'meta' => [
                 'Materia' => "{$offering->subject->code} - {$offering->subject->name}",
                 'Semestre / Mes / Turno' => "{$offering->semester->code} · {$offering->monthLabel()} · {$offering->shiftLabel()}",
@@ -102,10 +102,10 @@ class AcademicReportBuilder
             ->values();
 
         $rows = $enrollments->map(fn (Enrollment $e) => [
-            $e->student->code ?? ('EST-' . $e->student->id),
+            $e->student->code ?? ('EST-'.$e->student->id),
             $e->student->name,
-            'Intento #' . $e->attempt_number,
-            $e->accumulatedScore() . ' / 100',
+            'Intento #'.$e->attempt_number,
+            $e->accumulatedScore().' / 100',
             $e->final_score !== null ? (string) $e->final_score : 'Pendiente cierre',
             $e->statusLabel(),
         ])->all();
@@ -116,7 +116,7 @@ class AcademicReportBuilder
         return [
             'title' => 'Acta de Calificaciones de la Oferta',
             'subtitle' => "{$offering->subject->code} - {$offering->subject->name}",
-            'filename' => 'calificaciones_' . strtolower($offering->subject->code) . '_' . $offering->id,
+            'filename' => 'calificaciones_'.strtolower($offering->subject->code).'_'.$offering->id,
             'meta' => [
                 'Materia' => "{$offering->subject->code} - {$offering->subject->name}",
                 'Periodo' => "{$offering->semester->code} · {$offering->monthLabel()} · {$offering->shiftLabel()}",
@@ -155,7 +155,7 @@ class AcademicReportBuilder
         return [
             'title' => 'Historial de Materias Dictadas (Docente)',
             'subtitle' => $teacher->name,
-            'filename' => 'historial_docente_' . ($teacher->code ?? $teacher->id),
+            'filename' => 'historial_docente_'.($teacher->code ?? $teacher->id),
             'meta' => [
                 'Docente' => $teacher->name,
                 'Facultad(es)' => $teacher->assignedFaculties()->pluck('name')->implode(', ') ?: '—',
@@ -181,8 +181,8 @@ class AcademicReportBuilder
             $e->offering->monthLabel(),
             $e->subject->code,
             $e->subject->name,
-            '#' . $e->attempt_number,
-            $e->final_score !== null ? (string) $e->final_score : ($e->status === Enrollment::STATUS_IN_PROGRESS ? $e->accumulatedScore() . ' (acum.)' : '—'),
+            '#'.$e->attempt_number,
+            $e->final_score !== null ? (string) $e->final_score : ($e->status === Enrollment::STATUS_IN_PROGRESS ? $e->accumulatedScore().' (acum.)' : '—'),
             $e->statusLabel(),
             $e->closed_at?->format('d/m/Y') ?? '—',
         ])->all();
@@ -192,9 +192,9 @@ class AcademicReportBuilder
         return [
             'title' => 'Récord e Historial Académico del Estudiante',
             'subtitle' => $student->name,
-            'filename' => 'historial_estudiante_' . ($student->code ?? $student->id),
+            'filename' => 'historial_estudiante_'.($student->code ?? $student->id),
             'meta' => [
-                'Estudiante' => $student->name . ($student->code ? " ({$student->code})" : ''),
+                'Estudiante' => $student->name.($student->code ? " ({$student->code})" : ''),
                 'Carrera' => $student->career->name ?? '—',
             ],
             'columns' => ['Semestre', 'Mes', 'Código', 'Materia', 'Intento', 'Nota', 'Estado', 'Cierre'],

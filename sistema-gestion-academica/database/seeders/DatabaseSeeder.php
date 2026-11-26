@@ -16,6 +16,7 @@ use App\Models\Tuition;
 use App\Models\User;
 use App\Services\SemesterService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -338,7 +339,7 @@ class DatabaseSeeder extends Seeder
             [$subjects['INV-101'], $prevMonths[4], 'noche', '18:45', '22:15', 104, $docIng2, [[$estDual, $carSis, 85], [$estTel, $carTel, 90]]],
         ] as [$subj, $m, $sh, $stTime, $endTime, $room, $teacher, $enrList]) {
             $start = sprintf('%04d-%02d-01', $prevSemester->year, $m);
-            $end = \Illuminate\Support\Carbon::parse($start)->endOfMonth()->format('Y-m-d');
+            $end = Carbon::parse($start)->endOfMonth()->format('Y-m-d');
             $off = Offering::create([
                 'subject_id' => $subj->id,
                 'semester_id' => $prevSemester->id,
@@ -351,7 +352,7 @@ class DatabaseSeeder extends Seeder
                 'max_capacity' => 50,
                 'teacher_id' => $teacher->id,
                 'classroom' => $room,
-                'closed_at' => $end . ' 20:00:00',
+                'closed_at' => $end.' 20:00:00',
                 'closed_by' => $teacher->id,
             ]);
             foreach ($enrList as [$st, $car, $sc]) {
@@ -364,8 +365,8 @@ class DatabaseSeeder extends Seeder
                     'attempt_number' => 1,
                     'final_score' => $sc,
                     'status' => $sc >= 51 ? Enrollment::STATUS_PASSED : Enrollment::STATUS_FAILED,
-                    'enrolled_at' => $start . ' 09:00:00',
-                    'closed_at' => $end . ' 20:00:00',
+                    'enrolled_at' => $start.' 09:00:00',
+                    'closed_at' => $end.' 20:00:00',
                 ]);
             }
         }
@@ -518,7 +519,7 @@ class DatabaseSeeder extends Seeder
         ActivityLog::create([
             'user_id' => $admin->id,
             'action' => 'sistema_inicializado',
-            'description' => "Sistema modular configurado con 4 facultades, 8 carreras (48 materias c/u), horarios por turno y soporte de doble carrera.",
+            'description' => 'Sistema modular configurado con 4 facultades, 8 carreras (48 materias c/u), horarios por turno y soporte de doble carrera.',
         ]);
     }
 

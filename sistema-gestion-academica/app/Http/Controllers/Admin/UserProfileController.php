@@ -74,7 +74,7 @@ class UserProfileController extends Controller
             User::ROLE_TEACHER => 'DOC',
             default => 'EST',
         };
-        $code = $prefix . '-' . now()->format('Y') . str_pad((string) (User::max('id') + 1), 3, '0', STR_PAD_LEFT);
+        $code = $prefix.'-'.now()->format('Y').str_pad((string) (User::max('id') + 1), 3, '0', STR_PAD_LEFT);
 
         $user = User::create([
             'name' => $validated['name'],
